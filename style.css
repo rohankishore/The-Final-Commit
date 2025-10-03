@@ -1,6 +1,7 @@
 body {
+    overflow-x: hidden; /* Prevents horizontal scroll */
     font-family: 'Inter', sans-serif;
-    background-color: #121212;
+    background-color: #18171c;
 }
 .step { display: none; }
 .step.active { display: block; }
@@ -40,11 +41,6 @@ input:checked + .toggle-bg {
     background-color: #22C55E;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden; /* Prevents horizontal scroll */
-    overscroll-behavior-x: none; /* Optional: Disables pull-to-refresh on some browsers */
-}
 button, a {
     -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile for a native feel */
 }
