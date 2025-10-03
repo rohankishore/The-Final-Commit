@@ -193,7 +193,6 @@
                 loadingAuth.style.display = 'none';
                 appContent.style.display = 'block';
 
-                // Fetch initial orders
                 const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready']);
                 if (error) { console.error('Error fetching initial orders:', error); return; }
                 orders = data;
