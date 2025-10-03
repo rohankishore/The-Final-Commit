@@ -198,7 +198,6 @@
                 orders = data;
                 renderAllOrders();
 
-                // --- NEW ROBUST REAL-TIME LOGIC ---
                 supabase.channel('public:orders')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
                         console.log('Real-time order change received!', payload);
