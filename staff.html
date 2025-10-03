@@ -57,7 +57,14 @@
         </div>
     </div>
 
-    <div id="loading-auth" class="flex items-center justify-center h-screen"><p>Verifying access...</p></div>
+    <div id="loading-auth" class="flex items-center justify-center h-screen text-center p-4">
+        <div>
+            <p class="font-semibold text-gray-600 dark:text-gray-300">Verifying access...</p>
+            <div class="mt-2 w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto overflow-hidden">
+                 <div class="w-1/2 h-full bg-primary animate-pulse"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- QR Scanner Modal -->
     <div id="qr-scanner-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center p-4">
@@ -137,77 +144,123 @@
             if (error) console.error('Error updating status:', error);
         }
 
-        async function getSupabaseConfig() { /* Unchanged */ return null; }
+        async function getSupabaseConfig() {
+            // --- FOR LOCAL DEVELOPMENT ---
+            const SUPABASE_URL = "YOUR_SUPABASE_URL";
+            const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+            if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
+                return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
+            }
+            // --- For Vercel/Production ---
+            try {
+                const response = await fetch('/api/config');
+                if (!response.ok) { throw new Error('Failed to fetch config'); }
+                return await response.json();
+            } catch (error) {
+                console.error("Configuration Error:", error);
+                loadingAuth.innerHTML = `<p class="p-4 text-center text-red-500 bg-red-100 rounded-lg"><strong>Error:</strong> Could not connect to backend.</p>`;
+                return null;
+            }
+        }
 
         async function initializeStaffView() {
-            const config = await getSupabaseConfig();
-            if (!config) return;
-            supabase = createClient(config.url, config.anonKey);
+            try {
+                const config = await getSupabaseConfig();
+                if (!config) return;
+                supabase = createClient(config.url, config.anonKey);
 
-            // --- SECURITY CHECK (Unchanged) ---
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.replace('/staff_login.html'); return; }
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-            if (!profile || profile.role !== 'staff') { await supabase.auth.signOut(); window.location.replace('/staff_login.html'); return; }
+                // --- ROBUST SECURITY CHECK ---
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
 
-            loadingAuth.style.display = 'none';
-            appContent.style.display = 'block';
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
 
-            // Fetch initial orders
-            const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready']);
-            if (error) { console.error('Error fetching initial orders:', error); return; }
-            orders = data;
-            renderAllOrders();
+                if (profileError && profileError.code === 'PGRST116') {
+                    console.error("Access Denied: User exists in auth but has no profile entry.");
+                    await supabase.auth.signOut();
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
+                if (profileError) throw profileError;
 
-            // Listen for real-time changes
-            supabase.channel('public:orders')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-                    const changedOrder = payload.new;
-                    const existingOrderIndex = orders.findIndex(o => o.id === changedOrder.id);
+                if (!profile || profile.role !== 'staff') {
+                    console.error("Access Denied: User is not a staff member.");
+                    await supabase.auth.signOut();
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
+                // --- END SECURITY CHECK ---
 
-                    if (payload.eventType === 'INSERT') {
-                        if (changedOrder.status === 'pending') orders.push(changedOrder);
-                    } else if (payload.eventType === 'UPDATE') {
-                        if (existingOrderIndex > -1) {
-                            if (changedOrder.status === 'completed') {
-                                orders.splice(existingOrderIndex, 1);
-                            } else {
-                                orders[existingOrderIndex] = changedOrder;
+                loadingAuth.style.display = 'none';
+                appContent.style.display = 'block';
+
+                // Fetch initial orders
+                const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready']);
+                if (error) { console.error('Error fetching initial orders:', error); return; }
+                orders = data;
+                renderAllOrders();
+
+                // Listen for real-time changes
+                supabase.channel('public:orders')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+                        const changedOrder = payload.new;
+                        const existingOrderIndex = orders.findIndex(o => o.id === changedOrder.id);
+
+                        if (payload.eventType === 'INSERT') {
+                            if (changedOrder.status === 'pending') orders.push(changedOrder);
+                        } else if (payload.eventType === 'UPDATE') {
+                            if (existingOrderIndex > -1) {
+                                if (changedOrder.status === 'completed') {
+                                    orders.splice(existingOrderIndex, 1);
+                                } else {
+                                    orders[existingOrderIndex] = changedOrder;
+                                }
                             }
                         }
+                        renderAllOrders();
+                    }).subscribe();
+
+                // Scanner Logic
+                html5QrCode = new Html5Qrcode("qr-reader-container");
+                const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                    scannerModal.classList.add('hidden');
+                    html5QrCode.stop();
+                    confirmPaymentAndAcceptOrder(decodedText);
+                };
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+                scanQrBtn.addEventListener('click', () => {
+                    scannerModal.classList.remove('hidden');
+                    scannerModal.classList.add('flex');
+                    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                        .catch(err => console.log(`QR Code scanning failed. Reason: ${err}`));
+                });
+
+                closeScannerBtn.addEventListener('click', () => {
+                    scannerModal.classList.add('hidden');
+                    try { html5QrCode.stop(); } catch(e) { console.warn("Scanner already stopped.")}
+                });
+
+                document.getElementById('orders-board').addEventListener('click', (e) => {
+                    const target = e.target.closest('.update-status-btn');
+                    if (target) {
+                        target.disabled = true;
+                        target.textContent = 'Completing...';
+                        updateOrderStatus(target.dataset.id, target.dataset.status);
                     }
-                    renderAllOrders();
-                }).subscribe();
+                });
 
-            // Scanner Logic
-            html5QrCode = new Html5Qrcode("qr-reader-container");
-            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                scannerModal.classList.add('hidden');
-                html5QrCode.stop();
-                confirmPaymentAndAcceptOrder(decodedText);
-            };
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-            scanQrBtn.addEventListener('click', () => {
-                scannerModal.classList.remove('hidden');
-                scannerModal.classList.add('flex');
-                html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                    .catch(err => console.log(`QR Code scanning failed. Reason: ${err}`));
-            });
-
-            closeScannerBtn.addEventListener('click', () => {
-                scannerModal.classList.add('hidden');
-                html5QrCode.stop();
-            });
-
-            document.getElementById('orders-board').addEventListener('click', (e) => {
-                const target = e.target.closest('.update-status-btn');
-                if (target) {
-                    target.disabled = true;
-                    target.textContent = 'Completing...';
-                    updateOrderStatus(target.dataset.id, target.dataset.status);
-                }
-            });
+            } catch(error) {
+                console.error("Initialization failed:", error);
+                loadingAuth.innerHTML = `<p class="text-red-500 font-semibold">Error verifying access: ${error.message}</p>`;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', initializeStaffView);
