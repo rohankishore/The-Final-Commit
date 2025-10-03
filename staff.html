@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canteen Staff - Live Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#EA580C' },
+                        'dark-bg': '#18171c',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .order-column { min-height: 80vh; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-gray-200">
+
+    <div class="container mx-auto p-4">
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Live Canteen Orders</h1>
+            <div id="connection-status" class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+                <span class="text-sm font-medium text-gray-500">Connecting...</span>
+            </div>
+        </header>
+
+        <div id="orders-board" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+            <!-- New Orders Column -->
+            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">New Orders</h2>
+                <div id="new-orders-col" class="p-4 space-y-4 order-column">
+                    <!-- Orders will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Preparing Column -->
+            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Preparing</h2>
+                <div id="preparing-orders-col" class="p-4 space-y-4 order-column">
+                    <!-- Orders will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Ready for Pickup Column -->
+            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Ready for Pickup</h2>
+                <div id="ready-orders-col" class="p-4 space-y-4 order-column">
+                    <!-- Orders will be inserted here -->
+                </div>
+            </div>
+
+             <!-- Completed/Paid Column -->
+            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Completed & Paid</h2>
+                <div id="completed-orders-col" class="p-4 space-y-4 order-column">
+                    <!-- Orders will be inserted here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+        let supabase = null;
+        let orders = [];
+
+        const statusColumns = {
+            pending: document.getElementById('new-orders-col'),
+            preparing: document.getElementById('preparing-orders-col'),
+            ready: document.getElementById('ready-orders-col'),
+            completed: document.getElementById('completed-orders-col'),
+        };
+        const connectionStatusEl = document.getElementById('connection-status');
+
+        function renderOrderCard(order) {
+            const itemsHtml = order.items.map(item => `
+                <li class="text-sm">${item.name} x ${item.quantity}</li>
+            `).join('');
+
+            let actionButtonHtml = '';
+            switch (order.status) {
+                case 'pending':
+                    actionButtonHtml = `<button data-id="${order.id}" data-status="preparing" class="update-status-btn w-full mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Start Preparing</button>`;
+                    break;
+                case 'preparing':
+                    actionButtonHtml = `<button data-id="${order.id}" data-status="ready" class="update-status-btn w-full mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-600 transition">Mark as Ready</button>`;
+                    break;
+                case 'ready':
+                    actionButtonHtml = `<button data-id="${order.id}" data-status="completed" class="update-status-btn w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Verify Payment & Complete</button>`;
+                    break;
+            }
+
+            return `
+                <div id="order-${order.id}" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold">${order.user_name || 'Guest'}</h3>
+                        <span class="font-bold text-lg">₹${order.total_price}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Order #${order.id.substring(0, 8)}</p>
+                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-400">${itemsHtml}</ul>
+                    ${actionButtonHtml}
+                </div>
+            `;
+        }
+
+        function renderAllOrders() {
+            Object.values(statusColumns).forEach(col => col.innerHTML = '');
+            orders.forEach(order => {
+                const column = statusColumns[order.status];
+                if (column) {
+                    column.insertAdjacentHTML('beforeend', renderOrderCard(order));
+                }
+            });
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            const { error } = await supabase
+                .from('orders')
+                .update({ status: newStatus })
+                .eq('id', orderId);
+
+            if (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        async function getSupabaseConfig() {
+            try {
+                if (typeof __supabase_url !== 'undefined') {
+                    return { url: __supabase_url, anonKey: __supabase_anon_key };
+                }
+                const response = await fetch('/api/config');
+                 if (!response.ok) throw new Error('Failed to fetch config');
+                return await response.json();
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                return null;
+            }
+        }
+
+        async function initializeStaffView() {
+            const config = await getSupabaseConfig();
+            if (!config) return;
+            supabase = createClient(config.url, config.anonKey);
+
+            // Fetch initial orders
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .in('status', ['pending', 'preparing', 'ready']);
+
+            if (error) {
+                console.error('Error fetching initial orders:', error);
+                return;
+            }
+            orders = data;
+            renderAllOrders();
+
+            // Listen for real-time changes
+            const channel = supabase.channel('public:orders');
+            channel
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+                    console.log('Change received!', payload);
+                    const changedOrder = payload.new;
+                    const existingOrderIndex = orders.findIndex(o => o.id === changedOrder.id);
+
+                    if (payload.eventType === 'INSERT') {
+                        orders.push(changedOrder);
+                    } else if (payload.eventType === 'UPDATE') {
+                        if (existingOrderIndex > -1) {
+                            orders[existingOrderIndex] = changedOrder;
+                        }
+                    }
+
+                    // Re-render to move cards between columns
+                    renderAllOrders();
+                })
+                .subscribe((status) => {
+                     if (status === 'SUBSCRIBED') {
+                        connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-gray-500">Connected</span>`;
+                     } else {
+                        connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-sm font-medium text-gray-500">Connection Error</span>`;
+                     }
+                });
+
+            document.getElementById('orders-board').addEventListener('click', (e) => {
+                const target = e.target.closest('.update-status-btn');
+                if (target) {
+                    const orderId = target.dataset.id;
+                    const newStatus = target.dataset.status;
+                    target.disabled = true;
+                    target.textContent = 'Updating...';
+                    updateOrderStatus(orderId, newStatus);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeStaffView);
+    </script>
+</body>
+</html>
