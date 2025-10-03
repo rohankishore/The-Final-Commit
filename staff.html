@@ -83,11 +83,8 @@
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-        // --- PASTE YOUR KEYS HERE ---
         const SUPABASE_URL = "https://aieuyzdfsuczuidhrgot.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZXV5emRmc3VjenVpZGhyZ290Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzA3NDEsImV4cCI6MjA3NTA0Njc0MX0.mpGcYxjoPXBD2G4eo_GFJqbxsH4UVCxR_-KVDoQMWxY";
-        // -------------------------
-
 
         let supabase = null;
         let orders = [];
@@ -165,7 +162,6 @@
                 }
                 supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // --- ROBUST SECURITY CHECK ---
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) {
                     window.location.replace('/staff_login.html');
