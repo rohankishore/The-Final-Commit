@@ -77,6 +77,11 @@
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
+        // --- PASTE YOUR KEYS HERE ---
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        // -------------------------
+
         let supabase = null;
         let orders = [];
         let html5QrCode = null;
@@ -144,30 +149,13 @@
             if (error) console.error('Error updating status:', error);
         }
 
-        async function getSupabaseConfig() {
-            // --- FOR LOCAL DEVELOPMENT ---
-            const SUPABASE_URL = "YOUR_SUPABASE_URL";
-            const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-            if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
-                return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
-            }
-            // --- For Vercel/Production ---
-            try {
-                const response = await fetch('/api/config');
-                if (!response.ok) { throw new Error('Failed to fetch config'); }
-                return await response.json();
-            } catch (error) {
-                console.error("Configuration Error:", error);
-                loadingAuth.innerHTML = `<p class="p-4 text-center text-red-500 bg-red-100 rounded-lg"><strong>Error:</strong> Could not connect to backend.</p>`;
-                return null;
-            }
-        }
-
         async function initializeStaffView() {
             try {
-                const config = await getSupabaseConfig();
-                if (!config) return;
-                supabase = createClient(config.url, config.anonKey);
+                if (SUPABASE_URL === "YOUR_SUPABASE_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
+                    loadingAuth.innerHTML = `<p class="p-4 text-center text-red-500 bg-red-100 rounded-lg"><strong>Configuration Error:</strong><br>Please add your Supabase URL and Key to the script.</p>`;
+                    return;
+                }
+                supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
                 // --- ROBUST SECURITY CHECK ---
                 const { data: { session } } = await supabase.auth.getSession();
@@ -231,7 +219,7 @@
                 html5QrCode = new Html5Qrcode("qr-reader-container");
                 const qrCodeSuccessCallback = (decodedText, decodedResult) => {
                     scannerModal.classList.add('hidden');
-                    html5QrCode.stop();
+                    try { html5QrCode.stop(); } catch(e) {}
                     confirmPaymentAndAcceptOrder(decodedText);
                 };
                 const config = { fps: 10, qrbox: { width: 250, height: 250 } };
