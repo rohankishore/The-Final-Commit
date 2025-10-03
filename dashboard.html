@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -32,9 +31,28 @@
         .cart-view {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
-
         #qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
     </style>
+
+    <script>
+        // Set up Tailwind CSS for class-based dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#F97316',
+                            DEFAULT: '#EA580C',
+                            dark: '#C2410C',
+                        },
+                        'dark-bg': '#18171c',
+                    }
+                }
+            }
+        }
+    </script>
+
 </head>
 <body class="bg-gray-100 dark:bg-dark-bg transition-colors duration-300">
 
