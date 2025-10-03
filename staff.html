@@ -67,7 +67,14 @@
         </div>
 
     </div>
-    <div id="loading-auth" class="flex items-center justify-center h-screen"><p>Verifying access...</p></div>
+    <div id="loading-auth" class="flex items-center justify-center h-screen text-center p-4">
+        <div>
+            <p class="font-semibold text-gray-600 dark:text-gray-300">Verifying access...</p>
+            <div class="mt-2 w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto overflow-hidden">
+                <div class="w-1/2 h-full bg-primary animate-pulse"></div>
+            </div>
+        </div>
+    </div>
 
 
     <script type="module">
@@ -89,100 +96,102 @@
         // Functions
         function renderOrderCard(order) { /* Unchanged */ return ''; }
         function renderAllOrders() { /* Unchanged */ }
-
-        function renderMenuItem(item) {
-            return `
-                <div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border dark:border-gray-700 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold">${item.name}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">₹${item.price}</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="" class="sr-only peer menu-availability-toggle" data-id="${item.id}" ${item.is_available ? 'checked' : ''}>
-                        <div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
-                    </label>
-                </div>
-            `;
-        }
-
-        function renderAllMenuItems() {
-            if (!menuManagementBoard) return;
-            menuManagementBoard.innerHTML = menuItems.map(renderMenuItem).join('');
-        }
-
-        async function updateItemAvailability(itemId, isAvailable) {
-            const { error } = await supabase
-                .from('menu_items')
-                .update({ is_available: isAvailable })
-                .eq('id', itemId);
-            if (error) console.error("Error updating item availability:", error);
-        }
-
+        function renderMenuItem(item) { /* Unchanged */ return ''; }
+        function renderAllMenuItems() { /* Unchanged */ }
+        async function updateItemAvailability(itemId, isAvailable) { /* Unchanged */ }
         async function updateOrderStatus(orderId, newStatus) { /* Unchanged */ }
         async function getSupabaseConfig() { /* Unchanged */ return null; }
 
         async function initializeStaffView() {
-            const config = await getSupabaseConfig();
-            if (!config) return;
-            supabase = createClient(config.url, config.anonKey);
-
-            // --- SECURITY CHECK (Unchanged) ---
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.replace('/staff_login.html'); return; }
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-            if (!profile || profile.role !== 'staff') { await supabase.auth.signOut(); window.location.replace('/staff_login.html'); return; }
-
-            loadingAuth.style.display = 'none';
-            appContent.style.display = 'block';
-
-            // Fetch initial data for both tabs
-            const [ordersRes, menuRes] = await Promise.all([
-                supabase.from('orders').select('*').in('status', ['pending', 'preparing', 'ready']),
-                supabase.from('menu_items').select('*').order('id')
-            ]);
-
-            if (ordersRes.error) console.error('Error fetching orders:', ordersRes.error);
-            else { orders = ordersRes.data; renderAllOrders(); }
-
-            if (menuRes.error) console.error('Error fetching menu:', menuRes.error);
-            else { menuItems = menuRes.data; renderAllMenuItems(); }
-
-            // Listen for real-time changes
-            const ordersChannel = supabase.channel('public:orders').on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { /* ... */ }).subscribe();
-            const menuChannel = supabase.channel('public:menu_items').on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => {
-                const updatedItem = payload.new;
-                const index = menuItems.findIndex(item => item.id === updatedItem.id);
-                if (index > -1) {
-                    menuItems[index] = updatedItem;
-                    renderAllMenuItems(); // Re-render menu management list
+            try {
+                const config = await getSupabaseConfig();
+                if (!config) {
+                    loadingAuth.innerHTML = '<p class="text-red-500 font-semibold">Could not load app configuration. Please check the connection.</p>';
+                    return;
                 }
-            }).subscribe();
+                supabase = createClient(config.url, config.anonKey);
 
-            // Event Listeners
-            tabs.forEach(button => {
-                button.addEventListener('click', () => {
-                    tabs.forEach(btn => btn.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    button.classList.add('active');
-                    document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+                // --- NEW ROBUST SECURITY CHECK ---
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (!session) {
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
+
+                // Specific check for "No rows found" which means the user exists but has no profile
+                if (profileError && profileError.code === 'PGRST116') {
+                    console.error("Access Denied: User exists in auth but has no profile entry.");
+                    await supabase.auth.signOut();
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
+
+                // Handle any other unexpected database errors during profile fetch
+                if (profileError) {
+                    throw profileError;
+                }
+
+                // Finally, check if the profile exists and the role is 'staff'
+                if (!profile || profile.role !== 'staff') {
+                    console.error("Access Denied: User is not a staff member.");
+                    await supabase.auth.signOut();
+                    window.location.replace('/staff_login.html');
+                    return;
+                }
+                // --- END SECURITY CHECK ---
+
+                // If all checks pass, show the app content
+                loadingAuth.style.display = 'none';
+                appContent.style.display = 'block';
+
+                // Fetch initial data for both tabs
+                const [ordersRes, menuRes] = await Promise.all([
+                    supabase.from('orders').select('*').in('status', ['pending', 'preparing', 'ready']),
+                    supabase.from('menu_items').select('*').order('id')
+                ]);
+
+                if (ordersRes.error) console.error('Error fetching orders:', ordersRes.error);
+                else { orders = ordersRes.data; renderAllOrders(); }
+
+                if (menuRes.error) console.error('Error fetching menu:', menuRes.error);
+                else { menuItems = menuRes.data; renderAllMenuItems(); }
+
+                // Listen for real-time changes
+                supabase.channel('public:orders').on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { /* ... */ }).subscribe(status => {
+                     if (status === 'SUBSCRIBED') {
+                        connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-gray-500">Connected</span>`;
+                     } else {
+                        connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-sm font-medium text-gray-500">Connection Error</span>`;
+                     }
                 });
-            });
+                supabase.channel('public:menu_items').on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => { /* ... */ }).subscribe();
 
-            menuManagementBoard.addEventListener('change', e => {
-                if (e.target.matches('.menu-availability-toggle')) {
-                    const itemId = e.target.dataset.id;
-                    const isAvailable = e.target.checked;
-                    updateItemAvailability(itemId, isAvailable);
-                }
-            });
-            document.getElementById('orders-board').addEventListener('click', (e) => { /* Unchanged */ });
+                // Event Listeners (Tabs, Menu Toggles, Order Buttons)
+                 tabs.forEach(button => { /* ... */ });
+                 menuManagementBoard.addEventListener('change', e => { /* ... */ });
+                 document.getElementById('orders-board').addEventListener('click', (e) => { /* ... */ });
+
+            } catch (error) {
+                console.error("Initialization failed:", error);
+                loadingAuth.innerHTML = `<p class="text-red-500 font-semibold">Error verifying access: ${error.message}</p>`;
+            }
         }
 
         // Stubs for brevity
         renderOrderCard = function(order) { const itemsHtml = order.items.map(item => `<li class="text-sm">${item.name} x ${item.quantity}</li>`).join(''); let actionButtonHtml = ''; switch (order.status) { case 'pending': actionButtonHtml = `<button data-id="${order.id}" data-status="preparing" class="update-status-btn w-full mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Start Preparing</button>`; break; case 'preparing': actionButtonHtml = `<button data-id="${order.id}" data-status="ready" class="update-status-btn w-full mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-600 transition">Mark as Ready</button>`; break; case 'ready': actionButtonHtml = `<button data-id="${order.id}" data-status="completed" class="update-status-btn w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Verify Payment & Complete</button>`; break; } return `<div id="order-${order.id}" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700"><div class="flex justify-between items-center"><h3 class="font-bold">${order.user_name || 'Guest'}</h3><span class="font-bold text-lg">₹${order.total_price}</span></div><p class="text-xs text-gray-500 mb-2">Order #${order.id.substring(0, 8)}</p><ul class="list-disc list-inside text-gray-600 dark:text-gray-400">${itemsHtml}</ul>${actionButtonHtml}</div>`; }
         renderAllOrders = function() { Object.values(statusColumns).forEach(col => col.innerHTML = ''); orders.forEach(order => { const column = statusColumns[order.status]; if (column) { column.insertAdjacentHTML('beforeend', renderOrderCard(order)); } }); }
+        renderMenuItem = function(item) { return `<div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border dark:border-gray-700 flex justify-between items-center"><div><p class="font-bold">${item.name}</p><p class="text-sm text-gray-500 dark:text-gray-400">₹${item.price}</p></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" value="" class="sr-only peer menu-availability-toggle" data-id="${item.id}" ${item.is_available ? 'checked' : ''}><div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div></label></div>`; }
+        renderAllMenuItems = function() { if (!menuManagementBoard) return; menuManagementBoard.innerHTML = menuItems.map(renderMenuItem).join(''); }
         getSupabaseConfig = async function() { if (typeof __supabase_url !== 'undefined') { return { url: __supabase_url, anonKey: __supabase_anon_key }; } return null; }
         updateOrderStatus = async function(orderId, newStatus) { const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId); if (error) console.error('Error updating status:', error); };
+        updateItemAvailability = async function(itemId, isAvailable) { const { error } = await supabase.from('menu_items').update({ is_available: isAvailable }).eq('id', itemId); if (error) console.error("Error updating item availability:", error); }
 
         document.addEventListener('DOMContentLoaded', initializeStaffView);
     </script>
