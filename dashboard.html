@@ -72,7 +72,7 @@
                 <!-- Search Bar -->
                 <div class="p-4">
                     <div class="relative">
-                        <input type="text" placeholder="Search for a dish..." class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" id="search-input" placeholder="Search for a dish..." class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                         <svg class="w-5 h-5 text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
@@ -134,7 +134,6 @@
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">My Orders</h2>
                  </header>
                  <div id="my-orders-container" class="space-y-4">
-                    <!-- Orders will be dynamically inserted here -->
                      <p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>
                  </div>
             </div>
@@ -186,6 +185,7 @@
         let cart = [];
         let user = null;
         let userProfile = null;
+        let menuData = []; // This will be fetched from the database
 
         // --- UI Element References ---
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -193,8 +193,8 @@
         const navButtons = document.querySelectorAll('.nav-button');
         const menuContainer = document.getElementById('menu-container');
         const categoryFiltersContainer = document.getElementById('category-filters');
+        const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
-
         const cartViewBar = document.getElementById('cart-view-bar');
         const cartItemCountEl = document.getElementById('cart-item-count');
         const cartTotalPriceEl = document.getElementById('cart-total-price');
@@ -204,49 +204,22 @@
         const cartItemsContainer = document.getElementById('cart-items-container');
         const cartModalTotal = document.getElementById('cart-modal-total');
         const placeOrderBtn = document.getElementById('place-order-btn');
-
         const myOrdersContainer = document.getElementById('my-orders-container');
-
-        const menuData = [
-            { id: 1, name: 'Masala Dosa', price: 40, category: 'Breakfast', type: 'veg', img: 'https://placehold.co/600x400/FFF4E6/333333?text=Dosa' },
-            { id: 2, name: 'Puttu & Kadala', price: 35, category: 'Breakfast', type: 'veg', img: 'https://placehold.co/600x400/FFF4E6/333333?text=Puttu' },
-            { id: 3, name: 'Egg Curry & Idiyappam', price: 50, category: 'Breakfast', type: 'non-veg', img: 'https://placehold.co/600x400/FFE6E6/333333?text=Egg+Curry' },
-            { id: 4, name: 'Veg Meals', price: 30, category: 'Lunch', type: 'veg', img: 'https://placehold.co/600x400/F0FFF0/333333?text=Meals' },
-            { id: 5, name: 'Chicken Biryani', price: 70, category: 'Lunch', type: 'non-veg', img: 'https://placehold.co/600x400/FFE6E6/333333?text=Biryani' },
-            { id: 6, name: 'Beef Biryani', price: 100, category: 'Lunch', type: 'non-veg', img: 'https://placehold.co/600x400/FFE6E6/333333?text=Beef+Biryani' },
-            { id: 7, name: 'Veg Biryani', price: 40, category: 'Lunch', type: 'veg', img: 'https://placehold.co/600x400/FFE6E6/333333?text=Veg+Biryani' },
-            { id: 8, name: 'Fish Curry Meals', price: 100, category: 'Lunch', type: 'non-veg', img: 'https://placehold.co/600x400/E6F4FF/333333?text=Fish+Curry' },
-            { id: 9, name: 'Pazham Pori', price: 10, category: 'Snacks', type: 'veg', img: 'https://placehold.co/600x400/FFFFE6/333333?text=Snacks' },
-            { id: 10, name: 'Chicken Cutlet', price: 20, category: 'Snacks', type: 'non-veg', img: 'https://placehold.co/600x400/FFE6E6/333333?text=Cutlet' },
-            { id: 11, name: 'Lime Juice', price: 7, category: 'Drinks', type: 'veg', img: 'https://placehold.co/600x400/E6FFFA/333333?text=Juice' },
-            { id: 12, name: 'Tea', price: 7, category: 'Drinks', type: 'veg', img: 'https://placehold.co/600x400/E6FFFA/333333?text=Tea' },
-            { id: 13, name: 'Coffee', price: 10, category: 'Drinks', type: 'veg', img: 'https://placehold.co/600x400/E6FFFA/333333?text=Coffee' },
-        ];
 
         // --- Core Functions ---
         async function getSupabaseConfig() {
-            // --- FOR LOCAL DEVELOPMENT ---
-            // Replace with your actual Supabase URL and Anon Key when testing locally
-            // DO NOT commit these keys to Git.
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
             if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
-                console.warn("Using local Supabase configuration. Do not deploy with these keys.");
                 return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
             }
-
-            // --- For Vercel/Production Deployment ---
             try {
                 const response = await fetch('/api/config');
-                 if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'Failed to fetch config');
-                }
+                if (!response.ok) { throw new Error('Failed to fetch config'); }
                 return await response.json();
             } catch (error) {
-                console.error("Configuration Error:", error.message);
-                document.getElementById('app-container').innerHTML = `<div class="p-4 text-center text-red-500 bg-red-100 rounded-lg"><strong>Error:</strong> Could not connect to backend.</div>`;
+                console.error("Configuration Error:", error);
+                document.getElementById('app-container').innerHTML = `<div class="p-4 text-center text-red-500">Could not connect to backend.</div>`;
                 return null;
             }
         }
@@ -259,20 +232,16 @@
                 ]);
 
                 if (preferencesRes.error && preferencesRes.error.code === 'PGRST116') {
-                    console.warn("User has not completed onboarding. Redirecting.");
                     window.location.replace('/');
-                    return { profile: profileRes.data, preferences: null };
+                    return null;
                 }
-
                 if (profileRes.error) throw profileRes.error;
                 if (preferencesRes.error) throw preferencesRes.error;
 
                 return { profile: profileRes.data, preferences: preferencesRes.data };
             } catch (error) {
-                 if (error.code !== 'PGRST116') {
-                    console.error('Error fetching user data:', error);
-                 }
-                return { profile: null, preferences: null };
+                 if (error.code !== 'PGRST116') { console.error('Error fetching user data:', error); }
+                return null;
             }
         }
 
@@ -280,36 +249,23 @@
             if (!userData) return;
             const { profile, preferences } = userData;
             userProfile = profile;
-
             if (profile) {
                 const initial = profile.name ? profile.name.charAt(0).toUpperCase() : '?';
                 document.getElementById('user-initial-home').textContent = initial;
                 document.getElementById('user-initial-profile').textContent = initial;
                 document.getElementById('user-name-profile').textContent = profile.name || 'N/A';
                 document.getElementById('user-email-profile').textContent = user?.email || 'N/A';
-
-                document.getElementById('profile-details').innerHTML = `
-                    <p><strong>Admission No:</strong> ${profile.admission_number || 'N/A'}</p>
-                    <p><strong>Department:</strong> ${profile.department || 'N/A'}</p>
-                    <p><strong>Semester:</strong> ${profile.semester || 'N/A'}</p>
-                    <p><strong>Phone:</strong> ${profile.phone || 'N/A'}</p>
-                `;
+                document.getElementById('profile-details').innerHTML = `<p><strong>Admission No:</strong> ${profile.admission_number || 'N/A'}</p><p><strong>Department:</strong> ${profile.department || 'N/A'}</p><p><strong>Semester:</strong> ${profile.semester || 'N/A'}</p><p><strong>Phone:</strong> ${profile.phone || 'N/A'}</p>`;
             }
-
             if (preferences) {
                  document.getElementById('diet-preference').innerHTML = `<p>${preferences.diet || 'Not set'}</p>`;
             }
         }
 
         async function placeOrder() {
-            if (cart.length === 0 || !user || !userProfile) {
-                alert("Cart is empty or user is not logged in.");
-                return;
-            }
-
+            if (cart.length === 0 || !user || !userProfile) { return; }
             placeOrderBtn.disabled = true;
             placeOrderBtn.textContent = 'Placing Order...';
-
             const order = {
                 user_id: user.id,
                 user_name: userProfile.name,
@@ -317,9 +273,7 @@
                 total_price: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
                 status: 'pending'
             };
-
             const { error } = await supabase.from('orders').insert(order);
-
             if (error) {
                 console.error("Error placing order:", error);
                 alert('Could not place your order. Please try again.');
@@ -328,9 +282,6 @@
                 cart = [];
                 updateCartAndMenu();
                 cartModal.classList.add('hidden');
-
-                const { data } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-                renderMyOrders(data);
                 showPage('orders-page');
             }
             placeOrderBtn.disabled = false;
@@ -342,55 +293,38 @@
                 myOrdersContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>`;
                 return;
             }
-
-            const statusStyles = {
-                pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-                preparing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-                ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-                completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-            };
-
+            const statusStyles = { pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', preparing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300' };
             myOrdersContainer.innerHTML = orders.map(order => {
                 const itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
-                return `
-                <div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold px-2 py-1 rounded-full ${statusStyles[order.status] || ''}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-                        <span class="font-bold text-gray-800 dark:text-white">₹${order.total_price}</span>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Order #${order.id.substring(0,8)}</p>
-                    <ul class="text-sm list-disc list-inside text-gray-600 dark:text-gray-300">${itemsHtml}</ul>
-                </div>`
+                return `<div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700"><div class="flex justify-between items-center mb-2"><span class="text-xs font-semibold px-2 py-1 rounded-full ${statusStyles[order.status] || ''}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span><span class="font-bold text-gray-800 dark:text-white">₹${order.total_price}</span></div><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Order #${order.id.substring(0,8)}</p><ul class="text-sm list-disc list-inside text-gray-600 dark:text-gray-300">${itemsHtml}</ul></div>`
             }).join('');
         }
 
         function renderCategories() {
+            if (menuData.length === 0) return;
             const categories = ['All', ...new Set(menuData.map(item => item.category))];
             categoryFiltersContainer.innerHTML = categories.map((cat, index) => `<button class="category-btn flex-shrink-0 text-center ${index === 0 ? 'active font-bold text-primary' : ''}" data-filter="${cat.toLowerCase()}"><div class="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md mb-2 transition-all duration-200 ${index === 0 ? 'ring-2 ring-primary' : ''}"><span class="text-2xl">🥘</span></div><p class="text-xs font-semibold text-gray-700 dark:text-gray-300">${cat}</p></button>`).join('');
             document.querySelectorAll('.category-btn').forEach(button => {
                 button.addEventListener('click', () => {
-                    document.querySelectorAll('.category-btn').forEach(btn => {
-                        btn.classList.remove('active', 'font-bold', 'text-primary');
-                        btn.firstElementChild.classList.remove('ring-2', 'ring-primary');
-                    });
+                    document.querySelectorAll('.category-btn').forEach(btn => { btn.classList.remove('active', 'font-bold', 'text-primary'); btn.firstElementChild.classList.remove('ring-2', 'ring-primary'); });
                     button.classList.add('active', 'font-bold', 'text-primary');
                     button.firstElementChild.classList.add('ring-2', 'ring-primary');
-                    renderMenu(button.dataset.filter);
+                    updateCartAndMenu();
                 });
             });
         }
 
-        function renderMenu(filter = 'all') {
+        function renderMenu(filter = 'all', searchTerm = '') {
             menuContainer.innerHTML = '';
-            const filteredData = filter === 'all' ? menuData : menuData.filter(item => item.category.toLowerCase() === filter);
-            if(filteredData.length === 0){
-                menuContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 col-span-full">No items in this category.</p>`;
-                return;
-            }
+            let filteredData = menuData;
+            if (filter !== 'all') { filteredData = filteredData.filter(item => item.category.toLowerCase() === filter); }
+            if (searchTerm) { filteredData = filteredData.filter(item => item.name.toLowerCase().includes(searchTerm));}
+            if(filteredData.length === 0){ menuContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400">No items match your search.</p>`; return; }
             filteredData.forEach(item => {
                 const cartItem = cart.find(ci => ci.id === item.id);
                 const quantity = cartItem ? cartItem.quantity : 0;
-                const itemHtml = `<div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-start space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm"><img src="${item.img}" class="w-24 h-24 rounded-lg object-cover" alt="${item.name}"><div class="flex-1"><div class="flex items-center space-x-2"><span class="w-4 h-4 border-2 ${item.type === 'veg' ? 'border-green-500' : 'border-red-500'} flex items-center justify-center"><span class="w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}"></span></span><h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3></div><p class="text-sm text-gray-500 dark:text-gray-400">${item.category}</p><p class="mt-2 font-bold text-gray-700 dark:text-gray-200">₹${item.price}</p></div><div id="add-btn-container-${item.id}">${quantity > 0 ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg"><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2 py-1">${quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}">ADD</button>`}</div></div>`;
+                const isAvailable = item.is_available;
+                const itemHtml = `<div class="relative bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-start space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm ${!isAvailable ? 'opacity-50' : ''}"><img src="${item.img || 'https://placehold.co/100x100'}" class="w-24 h-24 rounded-lg object-cover ${!isAvailable ? 'grayscale' : ''}" alt="${item.name}"><div class="flex-1"><h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3><p class="text-sm text-gray-500 dark:text-gray-400">${item.category}</p><p class="mt-2 font-bold text-gray-700 dark:text-gray-200">₹${item.price}</p></div><div id="add-btn-container-${item.id}">${quantity > 0 ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg"><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2 py-1">${quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}" ${!isAvailable ? 'disabled' : ''}>${!isAvailable ? 'UNAVAILABLE' : 'ADD'}</button>`}</div></div>`;
                 menuContainer.innerHTML += itemHtml;
             });
         }
@@ -421,7 +355,8 @@
         function updateCartAndMenu() {
             updateCartUI();
             const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all';
-            renderMenu(activeFilter);
+            const searchTerm = searchInput.value.toLowerCase();
+            renderMenu(activeFilter, searchTerm);
         }
 
         document.body.addEventListener('click', (event) => {
@@ -444,29 +379,48 @@
             if (!session) { window.location.replace('/'); return; }
             user = session.user;
 
-            const userData = await fetchUserData(user);
-            populateDashboard(userData);
+            const [userData, menuRes] = await Promise.all([
+                fetchUserData(user),
+                supabase.from('menu_items').select('*').order('id')
+            ]);
 
-            navButtons.forEach(button => button.addEventListener('click', () => showPage(button.dataset.page)));
+            if (menuRes.error) {
+                console.error("Error fetching menu:", menuRes.error);
+                menuContainer.innerHTML = `<p class="text-red-500 text-center">Could not load menu.</p>`;
+            } else {
+                menuData = menuRes.data;
+            }
+
+            populateDashboard(userData);
             renderCategories();
             updateCartAndMenu();
             showPage('food-page');
 
-            viewCartBtn.addEventListener('click', () => cartModal.classList.remove('hidden'));
-            closeCartBtn.addEventListener('click', () => cartModal.classList.add('hidden'));
-            cartModal.addEventListener('click', (e) => { if (e.target.id === 'cart-modal') cartModal.classList.add('hidden'); });
+            searchInput.addEventListener('input', () => updateCartAndMenu());
+            navButtons.forEach(button => button.addEventListener('click', () => showPage(button.dataset.page)));
+            viewCartBtn.addEventListener('click', () => document.getElementById('cart-modal').classList.remove('hidden'));
+            closeCartBtn.addEventListener('click', () => document.getElementById('cart-modal').classList.add('hidden'));
+            document.getElementById('cart-modal').addEventListener('click', (e) => { if (e.target.id === 'cart-modal') document.getElementById('cart-modal').classList.add('hidden'); });
             placeOrderBtn.addEventListener('click', placeOrder);
-
             logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
 
-            const { data } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-            renderMyOrders(data);
+            const { data: initialOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+            renderMyOrders(initialOrders);
 
-            supabase.channel(`public:orders:user_id=eq.${user.id}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, async (payload) => {
-                    console.log('Order change received!', payload);
-                    const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-                    renderMyOrders(updatedOrders);
+            supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+                const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+                renderMyOrders(updatedOrders);
+            }).subscribe();
+
+            supabase.channel('public:menu_items')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => {
+                    const changedItem = payload.new || payload.old;
+                    const index = menuData.findIndex(item => item.id === changedItem.id);
+                    if (payload.eventType === 'UPDATE') { if (index > -1) menuData[index] = payload.new; }
+                    else if (payload.eventType === 'INSERT') { if (index === -1) menuData.push(payload.new); }
+                    else if (payload.eventType === 'DELETE') { if (index > -1) menuData.splice(index, 1); }
+                    renderCategories();
+                    updateCartAndMenu();
                 })
                 .subscribe();
         }
