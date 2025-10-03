@@ -192,11 +192,13 @@
 
         // --- Core Functions ---
         async function getSupabaseConfig() {
+            // --- FOR LOCAL DEVELOPMENT ---
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
             if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
                 return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
             }
+            // --- For Vercel/Production ---
             try {
                 const response = await fetch('/api/config');
                 if (!response.ok) { throw new Error('Failed to fetch config'); }
@@ -339,23 +341,24 @@
                 suggestionsContainer.classList.add('hidden');
                 return;
             }
+
             const hour = new Date().getHours();
             let mealTime = '';
-            let rawSuggestedItems = null;
+            let suggestedItems = null;
 
-            if (hour < 12) { mealTime = 'morning'; rawSuggestedItems = userPreferences?.daily_morning; }
-            else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; rawSuggestedItems = userPreferences?.daily_afternoon; }
-            else { mealTime = 'evening'; rawSuggestedItems = userPreferences?.daily_evening; }
-
-            const suggestedItems = Array.isArray(rawSuggestedItems) ? rawSuggestedItems : [];
+            if (userPreferences) {
+                if (hour < 12) { mealTime = 'morning'; suggestedItems = userPreferences.daily_morning; }
+                else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; suggestedItems = userPreferences.daily_afternoon; }
+                else { mealTime = 'evening'; suggestedItems = userPreferences.daily_evening; }
+            }
 
             suggestionsContainer.classList.remove('hidden');
 
-            if (suggestedItems.length === 0) {
+            if (!Array.isArray(suggestedItems) || suggestedItems.length === 0) {
                 suggestionsTitle.textContent = `Set your daily usuals!`;
                 suggestionsList.innerHTML = `
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Tired of searching? Go to your profile to set your favorite items for the ${mealTime}.
+                        Tired of searching? Go to your profile to set your favorite items for the ${mealTime || 'day'}.
                     </p>
                     <a href="profile.html" class="inline-block mt-2 text-sm font-bold text-primary hover:underline">Set Preferences →</a>
                 `;
@@ -444,7 +447,8 @@
         async function initializeDashboard() {
             const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDarkMode) document.documentElement.classList.add('dark');
-            document.getElementById('theme-toggle')?.addEventListener('click', () => { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); });
+            const themeToggle = document.getElementById('theme-toggle');
+            if(themeToggle) themeToggle.addEventListener('click', () => { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); });
 
             const config = await getSupabaseConfig();
             if (!config) return;
@@ -485,7 +489,8 @@
             document.getElementById('close-cart-btn').addEventListener('click', () => document.getElementById('cart-modal').classList.add('hidden'));
             document.getElementById('cart-modal').addEventListener('click', (e) => { if (e.target.id === 'cart-modal') document.getElementById('cart-modal').classList.add('hidden'); });
             placeOrderBtn.addEventListener('click', placeOrder);
-            document.getElementById('logout-btn')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
             closeSuggestionsBtn.addEventListener('click', () => {
                 suggestionsContainer.classList.add('hidden');
                 sessionStorage.setItem('suggestionsDismissed', 'true');
@@ -512,8 +517,10 @@
         function showPage(pageId) {
             pages.forEach(p => p.classList.toggle('active', p.id === pageId));
             document.querySelectorAll('.nav-button').forEach(b => {
-                const isActive = (b.dataset.page === pageId) || (b.href && b.href.includes(pageId));
-                b.classList.toggle('active', isActive);
+                const isButtonActive = b.dataset.page === pageId;
+                const isLinkActive = b.href && ( (pageId === 'orders-page' && b.href.includes('#orders')) || (pageId !=='orders-page' && !b.href.includes('#orders')) );
+
+                b.classList.toggle('active', isButtonActive || isLinkActive);
             });
         }
 
