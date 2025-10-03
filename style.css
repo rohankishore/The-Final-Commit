@@ -1,7 +1,7 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: #121212;
-    overflow-x: hidden; /* Prevents horizontal scroll */
+    overflow-x: hidden;
 }
 .step { display: none; }
 .step.active { display: block; }
