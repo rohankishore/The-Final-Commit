@@ -185,7 +185,7 @@
         let cart = [];
         let user = null;
         let userProfile = null;
-        let menuData = [];
+        let menuData = []; // This will be fetched from the database
 
         // --- UI Element References ---
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -195,9 +195,18 @@
         const categoryFiltersContainer = document.getElementById('category-filters');
         const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
+        const cartViewBar = document.getElementById('cart-view-bar');
+        const cartItemCountEl = document.getElementById('cart-item-count');
+        const cartTotalPriceEl = document.getElementById('cart-total-price');
+        const viewCartBtn = document.getElementById('view-cart-btn');
+        const cartModal = document.getElementById('cart-modal');
+        const closeCartBtn = document.getElementById('close-cart-btn');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const cartModalTotal = document.getElementById('cart-modal-total');
         const placeOrderBtn = document.getElementById('place-order-btn');
         const myOrdersContainer = document.getElementById('my-orders-container');
 
+        // --- Core Functions ---
         async function getSupabaseConfig() {
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
@@ -360,23 +369,19 @@
         }
 
         function updateCartUI() {
-            if (cart.length === 0) { cartViewBar.classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; }
-            cartViewBar.classList.remove('translate-y-24', 'opacity-0');
+            const cartModal = document.getElementById('cart-modal');
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartModalTotal = document.getElementById('cart-modal-total');
+
+            if (cart.length === 0) { document.getElementById('cart-view-bar').classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; }
+            document.getElementById('cart-view-bar').classList.remove('translate-y-24', 'opacity-0');
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            cartItemCountEl.textContent = `${totalItems} Item${totalItems > 1 ? 's' : ''}`;
-            cartTotalPriceEl.textContent = `₹${totalPrice}`;
+            document.getElementById('cart-item-count').textContent = `${totalItems} Item${totalItems > 1 ? 's' : ''}`;
+            document.getElementById('cart-total-price').textContent = `₹${totalPrice}`;
             cartModalTotal.textContent = `₹${totalPrice}`;
             cartItemsContainer.innerHTML = cart.map(item => `<div class="flex justify-between items-center"><p class="text-gray-700 dark:text-gray-300">${item.name}</p><div class="flex items-center space-x-2"><div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold text-sm"><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2">${item.quantity}</span><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div><p class="font-semibold w-12 text-right dark:text-white">₹${item.price * item.quantity}</p></div></div>`).join('');
         }
-
-        function updateCartAndMenu() {
-            updateCartUI();
-            const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all';
-            const searchTerm = searchInput.value.toLowerCase();
-            renderMenu(activeFilter, searchTerm);
-        }
-
 
         function updateCartAndMenu() {
             updateCartUI();
