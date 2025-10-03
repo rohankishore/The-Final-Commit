@@ -360,10 +360,6 @@
         }
 
         function updateCartUI() {
-            const cartModal = document.getElementById('cart-modal');
-            const cartItemsContainer = document.getElementById('cart-items-container');
-            const cartModalTotal = document.getElementById('cart-modal-total');
-
             if (cart.length === 0) { cartViewBar.classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; }
             cartViewBar.classList.remove('translate-y-24', 'opacity-0');
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -373,6 +369,14 @@
             cartModalTotal.textContent = `₹${totalPrice}`;
             cartItemsContainer.innerHTML = cart.map(item => `<div class="flex justify-between items-center"><p class="text-gray-700 dark:text-gray-300">${item.name}</p><div class="flex items-center space-x-2"><div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold text-sm"><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2">${item.quantity}</span><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div><p class="font-semibold w-12 text-right dark:text-white">₹${item.price * item.quantity}</p></div></div>`).join('');
         }
+
+        function updateCartAndMenu() {
+            updateCartUI();
+            const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all';
+            const searchTerm = searchInput.value.toLowerCase();
+            renderMenu(activeFilter, searchTerm);
+        }
+
 
         function updateCartAndMenu() {
             updateCartUI();
