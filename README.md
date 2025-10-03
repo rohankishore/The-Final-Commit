@@ -2,8 +2,7 @@
 
 ## Idea Abstract
 
-**[INSERT CONCISE 2-3 SENTENCE SUMMARY HERE]**
-*Example: Our solution is a simple, real-time ordering system built for the Civil Canteen using Firebase. It provides students with a seamless ordering interface and gives staff immediate order verification tools.*
+**This project digitizes the CET Civil Canteen to eliminate queues. Students order via a real-time app that generates a unique QR code for their purchase. Staff use a live dashboard with a built-in scanner to instantly verify payment by scanning the student's code, making the entire process fast, seamless, and foolproof.**
 
 ---
 
@@ -12,7 +11,7 @@
 | Role | Name | GitHub Profile |
 | :--- | :--- | :--- |
 | **Team Member 1** | Rohan Kishore | [@rohankishore](https://github.com/rohankishore) |
-| **Team Member 2** | [P Sreesankar] | [@p-sreesankar](https://github.com/p-sreesankar) |
+| **Team Member 2** | P Sreesankar | [@p-sreesankar](https://github.com/p-sreesankar) |
 
 ---
 
