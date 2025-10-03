@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
+
         // Set up Tailwind CSS for class-based dark mode
         tailwind.config = {
             darkMode: 'class',
@@ -79,8 +80,13 @@
                 <!-- Banner -->
                 <div class="px-4 py-2">
                     <div class="relative rounded-xl overflow-hidden h-40 shadow-lg">
-                        <img src="assets/bg.png" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
+                        <!-- Background Image: You can replace this src with your own image URL -->
+                        <img src="assets/bg.png"
+                             alt="Canteen Banner"
+                             class="absolute inset-0 w-full h-full object-cover">
+                        <!-- Overlay for text readability -->
                         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+                        <!-- Text Content -->
                         <div class="relative h-full flex flex-col justify-center items-center text-white text-center p-4">
                             <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Civil Canteen</h2>
                         </div>
@@ -88,10 +94,15 @@
                 </div>
                 <!-- Category Filters -->
                 <div class="py-4">
-                    <div id="category-filters" class="category-scroller flex space-x-4 px-4 overflow-x-auto"></div>
+                    <div id="category-filters" class="category-scroller flex space-x-4 px-4 overflow-x-auto">
+                        <!-- Categories will be dynamically inserted -->
+                    </div>
                 </div>
+
                 <!-- Menu Items -->
-                <div id="menu-container" class="px-4 space-y-4"></div>
+                <div id="menu-container" class="px-4 space-y-4">
+                    <!-- Menu items will be dynamically inserted here -->
+                </div>
             </div>
 
             <!-- Profile Page -->
@@ -99,6 +110,7 @@
                  <header class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">My Profile</h2>
                  </header>
+
                  <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center space-x-4 mb-6">
                     <div id="user-initial-profile" class="w-16 h-16 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white font-bold text-2xl">...</div>
                     <div>
@@ -106,20 +118,29 @@
                         <p id="user-email-profile" class="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                     </div>
                  </div>
+
                 <div class="grid grid-cols-1 gap-6">
                      <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <h2 class="text-base font-bold text-indigo-500 dark:text-indigo-400 mb-4">Details</h2>
-                        <div id="profile-details" class="space-y-3 text-gray-600 dark:text-gray-300"></div>
+                        <div id="profile-details" class="space-y-3 text-gray-600 dark:text-gray-300">
+                            <p class="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-3/4 rounded"></p>
+                            <p class="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-1/2 rounded"></p>
+                        </div>
                     </div>
                      <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <h2 class="text-base font-bold text-green-500 dark:text-green-400 mb-4">Dietary Choice</h2>
-                        <div id="diet-preference" class="font-semibold text-lg text-gray-700 dark:text-gray-200"></div>
+                        <div id="diet-preference" class="font-semibold text-lg text-gray-700 dark:text-gray-200">
+                             <p class="animate-pulse bg-gray-200 dark:bg-gray-700 h-6 w-1/3 rounded"></p>
+                        </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <h2 class="text-base font-bold text-gray-500 dark:text-gray-400 mb-4">Settings</h2>
                         <div class="flex justify-between items-center">
                             <p class="text-gray-700 dark:text-gray-200">Dark Mode</p>
-                            <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200 dark:bg-gray-600"><span class="sr-only">Enable dark mode</span><span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span></button>
+                            <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200 dark:bg-gray-600">
+                                <span class="sr-only">Enable dark mode</span>
+                                <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span>
+                            </button>
                         </div>
                          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                              <button id="logout-btn" class="w-full text-left text-red-500 font-semibold">Log Out</button>
@@ -128,15 +149,12 @@
                 </div>
             </div>
 
-             <!-- Orders Page -->
+             <!-- Orders Page (Placeholder) -->
             <div id="orders-page" class="page-content p-4">
-                 <header class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">My Orders</h2>
-                 </header>
-                 <div id="my-orders-container" class="space-y-4">
-                    <!-- Orders will be dynamically inserted here -->
-                     <p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>
-                 </div>
+                <div class="text-center py-20">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Your Orders</h2>
+                    <p class="text-gray-500 dark:text-gray-400">This section is under construction.</p>
+                </div>
             </div>
         </main>
     </div>
@@ -165,7 +183,7 @@
                     <span>To Pay</span>
                     <span id="cart-modal-total">₹0</span>
                 </div>
-                <button id="place-order-btn" class="w-full mt-4 bg-primary text-white font-bold py-3 rounded-lg">Place Order</button>
+                <button class="w-full mt-4 bg-primary text-white font-bold py-3 rounded-lg">Proceed to Pay</button>
             </div>
         </div>
     </div>
@@ -173,9 +191,18 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div class="flex justify-around max-w-2xl mx-auto">
-            <button data-page="food-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400 active"><svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><p class="text-xs font-medium">Home</p></button>
-            <button data-page="orders-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400"><svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg><p class="text-xs font-medium">Orders</p></button>
-            <button data-page="profile-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400"><svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg><p class="text-xs font-medium">Profile</p></button>
+            <button data-page="food-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400 active">
+                <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <p class="text-xs font-medium">Home</p>
+            </button>
+            <button data-page="orders-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400">
+                 <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <p class="text-xs font-medium">Orders</p>
+            </button>
+            <button data-page="profile-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400">
+                <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <p class="text-xs font-medium">Profile</p>
+            </button>
         </div>
     </nav>
 
@@ -185,7 +212,6 @@
         let supabase = null;
         let cart = [];
         let user = null;
-        let userProfile = null;
 
         // --- UI Element References ---
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -195,6 +221,7 @@
         const categoryFiltersContainer = document.getElementById('category-filters');
         const logoutBtn = document.getElementById('logout-btn');
 
+        // --- Cart UI References ---
         const cartViewBar = document.getElementById('cart-view-bar');
         const cartItemCountEl = document.getElementById('cart-item-count');
         const cartTotalPriceEl = document.getElementById('cart-total-price');
@@ -203,9 +230,6 @@
         const closeCartBtn = document.getElementById('close-cart-btn');
         const cartItemsContainer = document.getElementById('cart-items-container');
         const cartModalTotal = document.getElementById('cart-modal-total');
-        const placeOrderBtn = document.getElementById('place-order-btn');
-
-        const myOrdersContainer = document.getElementById('my-orders-container');
 
         const menuData = [
             { id: 1, name: 'Masala Dosa', price: 40, category: 'Breakfast', type: 'veg', img: 'https://placehold.co/600x400/FFF4E6/333333?text=Dosa' },
@@ -224,95 +248,214 @@
         ];
 
         // --- Core Functions ---
-        async function getSupabaseConfig() { /* Unchanged */ return null; }
-        async function fetchUserData(user) { /* Unchanged */ return { profile: null, preferences: null }; }
+        async function getSupabaseConfig() {
+            try {
+                // In a real deployment, this would fetch from a secure endpoint
+                // For this environment, we simulate it if not available.
+                if (typeof __supabase_url !== 'undefined') {
+                    return { url: __supabase_url, anonKey: __supabase_anon_key };
+                }
+                const response = await fetch('/api/config');
+                 if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Failed to fetch config');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Initialization Error:", error.message);
+                document.getElementById('app-container').innerHTML = `<div class="p-4 text-center text-red-500">Could not connect to backend. Please check configuration.</div>`;
+                return null;
+            }
+        }
+
+        async function fetchUserData(user) {
+            try {
+                const [profileRes, preferencesRes] = await Promise.all([
+                    supabase.from('profiles').select('*').eq('id', user.id).single(),
+                    supabase.from('preferences').select('*').eq('id', user.id).single()
+                ]);
+
+                // A user might exist but not have finished onboarding, so preferences might be missing.
+                if (preferencesRes.error && preferencesRes.error.code === 'PGRST116') {
+                    console.warn("User has not completed onboarding. Redirecting.");
+                    window.location.replace('/');
+                    return { profile: profileRes.data, preferences: null };
+                }
+
+                if (profileRes.error) throw profileRes.error;
+                if (preferencesRes.error) throw preferencesRes.error;
+
+                return { profile: profileRes.data, preferences: preferencesRes.data };
+            } catch (error) {
+                 if (error.code !== 'PGRST116') { // Ignore "No rows found" for profile, but log other errors
+                    console.error('Error fetching user data:', error);
+                 }
+                return { profile: null, preferences: null };
+            }
+        }
 
         function populateDashboard(userData) {
             if (!userData) return;
             const { profile, preferences } = userData;
-            userProfile = profile; // Cache profile
 
-            if (profile) { /* Unchanged */ }
-            if (preferences) { /* Unchanged */ }
+            if (profile) {
+                const initial = profile.name ? profile.name.charAt(0).toUpperCase() : '?';
+                document.getElementById('user-initial-home').textContent = initial;
+                document.getElementById('user-initial-profile').textContent = initial;
+                document.getElementById('user-name-profile').textContent = profile.name || 'N/A';
+                document.getElementById('user-email-profile').textContent = user?.email || 'N/A';
+
+                document.getElementById('profile-details').innerHTML = `
+                    <p><strong>Admission No:</strong> ${profile.admission_number || 'N/A'}</p>
+                    <p><strong>Department:</strong> ${profile.department || 'N/A'}</p>
+                    <p><strong>Semester:</strong> ${profile.semester || 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${profile.phone || 'N/A'}</p>
+                `;
+            }
+
+            if (preferences) {
+                 document.getElementById('diet-preference').innerHTML = `<p>${preferences.diet || 'Not set'}</p>`;
+            }
         }
 
-        // --- NEW: Order Functions ---
-        async function placeOrder() {
-            if (cart.length === 0 || !user || !userProfile) {
-                alert("Cart is empty or user is not logged in.");
+        function renderCategories() {
+            const categories = ['All', ...new Set(menuData.map(item => item.category))];
+            categoryFiltersContainer.innerHTML = categories.map((cat, index) => `
+                <button class="category-btn flex-shrink-0 text-center ${index === 0 ? 'active font-bold text-primary' : ''}" data-filter="${cat.toLowerCase()}">
+                    <div class="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md mb-2 transition-all duration-200 ${index === 0 ? 'ring-2 ring-primary' : ''}"><span class="text-2xl">🥘</span></div>
+                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">${cat}</p>
+                </button>
+            `).join('');
+
+            document.querySelectorAll('.category-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(btn => {
+                        btn.classList.remove('active', 'font-bold', 'text-primary');
+                        btn.firstElementChild.classList.remove('ring-2', 'ring-primary');
+                    });
+                    button.classList.add('active', 'font-bold', 'text-primary');
+                    button.firstElementChild.classList.add('ring-2', 'ring-primary');
+                    renderMenu(button.dataset.filter);
+                });
+            });
+        }
+
+        function renderMenu(filter = 'all') {
+            menuContainer.innerHTML = '';
+            const filteredData = filter === 'all' ? menuData : menuData.filter(item => item.category.toLowerCase() === filter);
+
+            if(filteredData.length === 0){
+                menuContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 col-span-full">No items in this category.</p>`;
                 return;
             }
 
-            placeOrderBtn.disabled = true;
-            placeOrderBtn.textContent = 'Placing Order...';
+            filteredData.forEach(item => {
+                const cartItem = cart.find(ci => ci.id === item.id);
+                const quantity = cartItem ? cartItem.quantity : 0;
 
-            const order = {
-                user_id: user.id,
-                user_name: userProfile.name, // Using cached profile name
-                items: cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity, price: item.price})),
-                total_price: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                status: 'pending'
-            };
+                const itemHtml = `
+                    <div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-start space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <img src="${item.img}" class="w-24 h-24 rounded-lg object-cover" alt="${item.name}">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-4 h-4 border-2 ${item.type === 'veg' ? 'border-green-500' : 'border-red-500'} flex items-center justify-center">
+                                    <span class="w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                                </span>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${item.category}</p>
+                            <p class="mt-2 font-bold text-gray-700 dark:text-gray-200">₹${item.price}</p>
+                        </div>
+                        <div id="add-btn-container-${item.id}">
+                            ${quantity > 0 ? `
+                                <div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg">
+                                    <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                                    <span class="px-2 py-1">${quantity}</span>
+                                    <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                                </div>
+                            ` : `
+                                <button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}">ADD</button>
+                            `}
+                        </div>
+                    </div>`;
+                menuContainer.innerHTML += itemHtml;
+            });
+        }
 
-            const { error } = await supabase.from('orders').insert(order);
-
-            if (error) {
-                console.error("Error placing order:", error);
-                alert('Could not place your order. Please try again.');
-                placeOrderBtn.disabled = false;
-                placeOrderBtn.textContent = 'Place Order';
+        // --- Cart Logic ---
+        function addToCart(itemId) {
+            const itemInCart = cart.find(item => item.id === itemId);
+            if (itemInCart) {
+                itemInCart.quantity++;
             } else {
-                alert('Order placed successfully!');
-                cart = [];
-                updateCartAndMenu();
-                cartModal.classList.add('hidden');
-
-                // Fetch new orders and switch to orders page
-                const { data } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-                renderMyOrders(data);
-                showPage('orders-page');
-                placeOrderBtn.disabled = false;
-                placeOrderBtn.textContent = 'Place Order';
+                const itemToAdd = menuData.find(item => item.id === itemId);
+                cart.push({ ...itemToAdd, quantity: 1 });
             }
+            updateCartAndMenu();
         }
 
-        function renderMyOrders(orders) {
-            if (!orders || orders.length === 0) {
-                myOrdersContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>`;
+        function removeFromCart(itemId) {
+            const itemInCart = cart.find(item => item.id === itemId);
+            if (itemInCart) {
+                itemInCart.quantity--;
+                if (itemInCart.quantity === 0) {
+                    cart = cart.filter(item => item.id !== itemId);
+                }
+            }
+            updateCartAndMenu();
+        }
+
+        function updateCartUI() {
+            if (cart.length === 0) {
+                cartViewBar.classList.add('translate-y-24', 'opacity-0');
+                cartModal.classList.add('hidden');
                 return;
             }
+            cartViewBar.classList.remove('translate-y-24', 'opacity-0');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-            const statusStyles = {
-                pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-                preparing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-                ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-                completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-            };
+            cartItemCountEl.textContent = `${totalItems} Item${totalItems > 1 ? 's' : ''}`;
+            cartTotalPriceEl.textContent = `₹${totalPrice}`;
 
-            myOrdersContainer.innerHTML = orders.map(order => {
-                const itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
-                return `
-                <div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold px-2 py-1 rounded-full ${statusStyles[order.status] || ''}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-                        <span class="font-bold text-gray-800 dark:text-white">₹${order.total_price}</span>
+            // Update Modal
+            cartModalTotal.textContent = `₹${totalPrice}`;
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center">
+                    <p class="text-gray-700 dark:text-gray-300">${item.name}</p>
+                    <div class="flex items-center space-x-2">
+                         <div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold text-sm">
+                            <button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                            <span class="px-2">${item.quantity}</span>
+                            <button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                        </div>
+                        <p class="font-semibold w-12 text-right dark:text-white">₹${item.price * item.quantity}</p>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Order #${order.id.substring(0,8)}</p>
-                    <ul class="text-sm list-disc list-inside text-gray-600 dark:text-gray-300">${itemsHtml}</ul>
-                </div>`
-            }).join('');
+                </div>
+            `).join('');
         }
 
-        // --- Other Functions (renderCategories, renderMenu, cart logic) are unchanged ---
-        function renderCategories() { /* Unchanged */ }
-        function renderMenu(filter = 'all') { /* Unchanged */ }
-        function addToCart(itemId) { /* Unchanged */ }
-        function removeFromCart(itemId) { /* Unchanged */ }
-        function updateCartUI() { /* Unchanged */ }
-        function updateCartAndMenu() { /* Unchanged */ }
+        function updateCartAndMenu() {
+            updateCartUI();
+            const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all';
+            renderMenu(activeFilter);
+        }
 
-        // --- Event Delegation ---
-        document.body.addEventListener('click', (event) => { /* Unchanged */ });
+        // --- Event Delegation for Dynamic Content ---
+        document.body.addEventListener('click', (event) => {
+            const target = event.target.closest('button'); // More robust
+            if (!target) return;
+
+            if (target.matches('.add-to-cart-btn')) {
+                addToCart(parseInt(target.dataset.id));
+            }
+            if (target.matches('.cart-quantity-btn')) {
+                const id = parseInt(target.dataset.id);
+                const action = target.dataset.action;
+                if (action === 'increase') addToCart(id);
+                if (action === 'decrease') removeFromCart(id);
+            }
+        });
 
         // --- App Initialization ---
         async function initializeDashboard() {
@@ -323,12 +466,15 @@
 
             // 2. Initialize Supabase
             const config = await getSupabaseConfig();
-            if (!config) return;
+            if (!config || !config.url || !config.anonKey) return;
             supabase = createClient(config.url, config.anonKey);
 
             // 3. Check Session & Fetch Data
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.replace('/'); return; }
+            if (!session) {
+                window.location.replace('/');
+                return;
+            }
             user = session.user;
             const userData = await fetchUserData(user);
             populateDashboard(userData);
@@ -338,48 +484,41 @@
 
             renderCategories();
             updateCartAndMenu();
-            showPage('food-page');
+            showPage('food-page'); // Start on home page
 
-            // 5. Cart & Order listeners
+            // 5. Cart Modal listeners
             viewCartBtn.addEventListener('click', () => cartModal.classList.remove('hidden'));
             closeCartBtn.addEventListener('click', () => cartModal.classList.add('hidden'));
-            cartModal.addEventListener('click', (e) => { if (e.target.id === 'cart-modal') cartModal.classList.add('hidden'); });
-            placeOrderBtn.addEventListener('click', placeOrder); // Attach place order function
+            cartModal.addEventListener('click', (e) => {
+                if (e.target.id === 'cart-modal') cartModal.classList.add('hidden');
+            });
 
             // 6. Logout listener
-            logoutBtn.addEventListener('click', async () => { /* Unchanged */ });
-
-            // 7. Initial fetch of orders & Real-time subscription
-            const { data } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-            renderMyOrders(data);
-
-            supabase.channel(`public:orders:user_id=eq.${user.id}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, async (payload) => {
-                    console.log('Order change received!', payload);
-                    const { data } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-                    renderMyOrders(data);
-                })
-                .subscribe();
+            logoutBtn.addEventListener('click', async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Error logging out:', error);
+                } else {
+                    window.location.replace('/');
+                }
+            });
         }
 
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
-        function handleThemeToggle() { /* Unchanged */ }
-        function showPage(pageId) { /* Unchanged */ }
 
-        // --- Stubs for unchanged functions for brevity ---
-        getSupabaseConfig = async function() { if (typeof __supabase_url !== 'undefined') { return { url: __supabase_url, anonKey: __supabase_anon_key }; } return null; }
-        fetchUserData = async function(user) { const [profileRes, preferencesRes] = await Promise.all([supabase.from('profiles').select('*').eq('id', user.id).single(), supabase.from('preferences').select('*').eq('id', user.id).single()]); if (preferencesRes.error && preferencesRes.error.code === 'PGRST116') { window.location.replace('/'); return { profile: profileRes.data, preferences: null }; } return { profile: profileRes.data, preferences: preferencesRes.data }; }
-        populateDashboard = function(userData) { if (!userData) return; const { profile, preferences } = userData; userProfile = profile; if (profile) { const initial = profile.name ? profile.name.charAt(0).toUpperCase() : '?'; document.getElementById('user-initial-home').textContent = initial; document.getElementById('user-initial-profile').textContent = initial; document.getElementById('user-name-profile').textContent = profile.name || 'N/A'; document.getElementById('user-email-profile').textContent = user?.email || 'N/A'; document.getElementById('profile-details').innerHTML = `<p><strong>Admission No:</strong> ${profile.admission_number || 'N/A'}</p><p><strong>Department:</strong> ${profile.department || 'N/A'}</p><p><strong>Semester:</strong> ${profile.semester || 'N/A'}</p><p><strong>Phone:</strong> ${profile.phone || 'N/A'}</p>`; } if (preferences) { document.getElementById('diet-preference').innerHTML = `<p>${preferences.diet || 'Not set'}</p>`; } }
-        renderCategories = function() { const categories = ['All', ...new Set(menuData.map(item => item.category))]; categoryFiltersContainer.innerHTML = categories.map((cat, index) => `<button class="category-btn flex-shrink-0 text-center ${index === 0 ? 'active font-bold text-primary' : ''}" data-filter="${cat.toLowerCase()}"><div class="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md mb-2 transition-all duration-200 ${index === 0 ? 'ring-2 ring-primary' : ''}"><span class="text-2xl">🥘</span></div><p class="text-xs font-semibold text-gray-700 dark:text-gray-300">${cat}</p></button>`).join(''); document.querySelectorAll('.category-btn').forEach(button => { button.addEventListener('click', () => { document.querySelectorAll('.category-btn').forEach(btn => { btn.classList.remove('active', 'font-bold', 'text-primary'); btn.firstElementChild.classList.remove('ring-2', 'ring-primary'); }); button.classList.add('active', 'font-bold', 'text-primary'); button.firstElementChild.classList.add('ring-2', 'ring-primary'); renderMenu(button.dataset.filter); }); }); }
-        renderMenu = function(filter = 'all') { menuContainer.innerHTML = ''; const filteredData = filter === 'all' ? menuData : menuData.filter(item => item.category.toLowerCase() === filter); if(filteredData.length === 0){ menuContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 col-span-full">No items in this category.</p>`; return; } filteredData.forEach(item => { const cartItem = cart.find(ci => ci.id === item.id); const quantity = cartItem ? cartItem.quantity : 0; const itemHtml = `<div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-start space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm"><img src="${item.img}" class="w-24 h-24 rounded-lg object-cover" alt="${item.name}"><div class="flex-1"><div class="flex items-center space-x-2"><span class="w-4 h-4 border-2 ${item.type === 'veg' ? 'border-green-500' : 'border-red-500'} flex items-center justify-center"><span class="w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}"></span></span><h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3></div><p class="text-sm text-gray-500 dark:text-gray-400">${item.category}</p><p class="mt-2 font-bold text-gray-700 dark:text-gray-200">₹${item.price}</p></div><div id="add-btn-container-${item.id}">${quantity > 0 ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg"><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2 py-1">${quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}">ADD</button>`}</div></div>`; menuContainer.innerHTML += itemHtml; }); }
-        addToCart = function(itemId) { const itemInCart = cart.find(item => item.id === itemId); if (itemInCart) { itemInCart.quantity++; } else { const itemToAdd = menuData.find(item => item.id === itemId); cart.push({ ...itemToAdd, quantity: 1 }); } updateCartAndMenu(); }
-        removeFromCart = function(itemId) { const itemInCart = cart.find(item => item.id === itemId); if (itemInCart) { itemInCart.quantity--; if (itemInCart.quantity === 0) { cart = cart.filter(item => item.id !== itemId); } } updateCartAndMenu(); }
-        updateCartUI = function() { if (cart.length === 0) { cartViewBar.classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; } cartViewBar.classList.remove('translate-y-24', 'opacity-0'); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0); cartItemCountEl.textContent = `${totalItems} Item${totalItems > 1 ? 's' : ''}`; cartTotalPriceEl.textContent = `₹${totalPrice}`; cartModalTotal.textContent = `₹${totalPrice}`; cartItemsContainer.innerHTML = cart.map(item => `<div class="flex justify-between items-center"><p class="text-gray-700 dark:text-gray-300">${item.name}</p><div class="flex items-center space-x-2"><div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold text-sm"><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2">${item.quantity}</span><button class="px-2 py-0.5 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div><p class="font-semibold w-12 text-right dark:text-white">₹${item.price * item.quantity}</p></div></div>`).join(''); }
-        updateCartAndMenu = function() { updateCartUI(); const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all'; renderMenu(activeFilter); }
-        document.body.addEventListener('click', (event) => { const target = event.target.closest('button'); if (!target) return; if (target.matches('.add-to-cart-btn')) { addToCart(parseInt(target.dataset.id)); } if (target.matches('.cart-quantity-btn')) { const id = parseInt(target.dataset.id); const action = target.dataset.action; if (action === 'increase') addToCart(id); if (action === 'decrease') removeFromCart(id); } });
-        handleThemeToggle = function() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
-        showPage = function(pageId) { pages.forEach(p => p.classList.toggle('active', p.id === pageId)); navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === pageId)); }
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // --- Helper function stubs ---
+        function handleThemeToggle() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+        function showPage(pageId) {
+            pages.forEach(p => p.classList.toggle('active', p.id === pageId));
+            navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === pageId));
+        }
+
     </script>
+
 </body>
 </html>
 
