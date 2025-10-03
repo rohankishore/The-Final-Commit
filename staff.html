@@ -188,7 +188,6 @@
                     window.location.replace('/staff_login.html');
                     return;
                 }
-                // --- END SECURITY CHECK ---
 
                 loadingAuth.style.display = 'none';
                 appContent.style.display = 'block';
@@ -238,7 +237,6 @@
                          }
                     });
 
-                // Scanner Logic
                 html5QrCode = new Html5Qrcode("qr-reader-container");
                 const qrCodeSuccessCallback = (decodedText, decodedResult) => {
                     scannerModal.classList.add('hidden');
