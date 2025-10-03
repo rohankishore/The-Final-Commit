@@ -79,7 +79,7 @@
                 <!-- Banner -->
                 <div class="px-4 py-2">
                     <div class="relative rounded-xl overflow-hidden h-40 shadow-lg">
-                        <img src="assets/bg.png" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
                         <div class="relative h-full flex flex-col justify-center items-center text-white text-center p-4">
                             <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Civil Canteen</h2>
@@ -185,7 +185,7 @@
         let cart = [];
         let user = null;
         let userProfile = null;
-        let menuData = []; // This will be fetched from the database
+        let menuData = [];
 
         // --- UI Element References ---
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -195,18 +195,9 @@
         const categoryFiltersContainer = document.getElementById('category-filters');
         const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
-        const cartViewBar = document.getElementById('cart-view-bar');
-        const cartItemCountEl = document.getElementById('cart-item-count');
-        const cartTotalPriceEl = document.getElementById('cart-total-price');
-        const viewCartBtn = document.getElementById('view-cart-btn');
-        const cartModal = document.getElementById('cart-modal');
-        const closeCartBtn = document.getElementById('close-cart-btn');
-        const cartItemsContainer = document.getElementById('cart-items-container');
-        const cartModalTotal = document.getElementById('cart-modal-total');
         const placeOrderBtn = document.getElementById('place-order-btn');
         const myOrdersContainer = document.getElementById('my-orders-container');
 
-        // --- Core Functions ---
         async function getSupabaseConfig() {
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
@@ -281,7 +272,7 @@
                 alert('Order placed successfully!');
                 cart = [];
                 updateCartAndMenu();
-                cartModal.classList.add('hidden');
+                document.getElementById('cart-modal').classList.add('hidden');
                 showPage('orders-page');
             }
             placeOrderBtn.disabled = false;
@@ -320,11 +311,38 @@
             if (filter !== 'all') { filteredData = filteredData.filter(item => item.category.toLowerCase() === filter); }
             if (searchTerm) { filteredData = filteredData.filter(item => item.name.toLowerCase().includes(searchTerm));}
             if(filteredData.length === 0){ menuContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400">No items match your search.</p>`; return; }
+
             filteredData.forEach(item => {
                 const cartItem = cart.find(ci => ci.id === item.id);
                 const quantity = cartItem ? cartItem.quantity : 0;
                 const isAvailable = item.is_available;
-                const itemHtml = `<div class="relative bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-start space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm ${!isAvailable ? 'opacity-50' : ''}"><img src="${item.img || 'https://placehold.co/100x100'}" class="w-24 h-24 rounded-lg object-cover ${!isAvailable ? 'grayscale' : ''}" alt="${item.name}"><div class="flex-1"><h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3><p class="text-sm text-gray-500 dark:text-gray-400">${item.category}</p><p class="mt-2 font-bold text-gray-700 dark:text-gray-200">₹${item.price}</p></div><div id="add-btn-container-${item.id}">${quantity > 0 ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg"><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2 py-1">${quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}" ${!isAvailable ? 'disabled' : ''}>${!isAvailable ? 'UNAVAILABLE' : 'ADD'}</button>`}</div></div>`;
+                const itemHtml = `
+                <div class="relative bg-white dark:bg-gray-800/50 rounded-xl p-4 flex items-center space-x-4 border border-gray-200 dark:border-gray-700 shadow-sm ${!isAvailable ? 'opacity-50' : ''}">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                             <span class="w-4 h-4 border-2 ${item.type === 'veg' ? 'border-green-500' : 'border-red-500'} flex items-center justify-center">
+                                <span class="w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                            </span>
+                            <h3 class="font-bold text-gray-800 dark:text-gray-100">${item.name}</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 ml-6">${item.category}</p>
+                        <p class="mt-2 font-bold text-gray-700 dark:text-gray-200 ml-6">₹${item.price}</p>
+                    </div>
+                    <div id="add-btn-container-${item.id}" class="flex-shrink-0">
+                        ${quantity > 0 ? `
+                            <div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg">
+                                <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                                <span class="px-2 py-1">${quantity}</span>
+                                <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                            </div>
+                        ` : `
+                            <button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}" ${!isAvailable ? 'disabled' : ''}>
+                                ${!isAvailable ? 'UNAVAILABLE' : 'ADD'}
+                            </button>
+                        `}
+                    </div>
+                    ${!isAvailable ? `<div class="absolute inset-0 bg-black bg-opacity-60 rounded-xl"></div>` : ''}
+                </div>`;
                 menuContainer.innerHTML += itemHtml;
             });
         }
@@ -342,6 +360,10 @@
         }
 
         function updateCartUI() {
+            const cartModal = document.getElementById('cart-modal');
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartModalTotal = document.getElementById('cart-modal-total');
+
             if (cart.length === 0) { cartViewBar.classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; }
             cartViewBar.classList.remove('translate-y-24', 'opacity-0');
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -379,9 +401,10 @@
             if (!session) { window.location.replace('/'); return; }
             user = session.user;
 
-            const [userData, menuRes] = await Promise.all([
+            const [userData, menuRes, ordersRes] = await Promise.all([
                 fetchUserData(user),
-                supabase.from('menu_items').select('*').order('id')
+                supabase.from('menu_items').select('*').order('id'),
+                supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
             ]);
 
             if (menuRes.error) {
@@ -394,18 +417,16 @@
             populateDashboard(userData);
             renderCategories();
             updateCartAndMenu();
+            renderMyOrders(ordersRes.data);
             showPage('food-page');
 
             searchInput.addEventListener('input', () => updateCartAndMenu());
             navButtons.forEach(button => button.addEventListener('click', () => showPage(button.dataset.page)));
-            viewCartBtn.addEventListener('click', () => document.getElementById('cart-modal').classList.remove('hidden'));
-            closeCartBtn.addEventListener('click', () => document.getElementById('cart-modal').classList.add('hidden'));
+            document.getElementById('view-cart-btn').addEventListener('click', () => document.getElementById('cart-modal').classList.remove('hidden'));
+            document.getElementById('close-cart-btn').addEventListener('click', () => document.getElementById('cart-modal').classList.add('hidden'));
             document.getElementById('cart-modal').addEventListener('click', (e) => { if (e.target.id === 'cart-modal') document.getElementById('cart-modal').classList.add('hidden'); });
             placeOrderBtn.addEventListener('click', placeOrder);
             logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
-
-            const { data: initialOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-            renderMyOrders(initialOrders);
 
             supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
                 const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
