@@ -40,6 +40,31 @@ input:checked + .toggle-bg {
     background-color: #22C55E;
 }
 
+body {
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden; /* Prevents horizontal scroll */
+    overscroll-behavior-x: none; /* Optional: Disables pull-to-refresh on some browsers */
+}
+button, a {
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile for a native feel */
+}
+.page-content { display: none; }
+.page-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0px); }
+}
+.nav-button.active svg, .nav-button.active p { color: #EA580C; }
+.category-scroller::-webkit-scrollbar { display: none; }
+.category-scroller { -ms-overflow-style: none; scrollbar-width: none; }
+.cart-view {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+#qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
+
 
 .card {
     background-color: white;

@@ -7,40 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden; /* Prevents horizontal scroll */
-            overscroll-behavior-x: none; /* Optional: Disables pull-to-refresh on some browsers */
-        }
-        button, a {
-            -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile for a native feel */
-        }
-        .page-content { display: none; }
-        .page-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0px); }
-        }
-        .nav-button.active svg, .nav-button.active p { color: #EA580C; }
-        .category-scroller::-webkit-scrollbar { display: none; }
-        .category-scroller { -ms-overflow-style: none; scrollbar-width: none; }
-        .cart-view {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        #qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-100 dark:bg-dark-bg transition-colors duration-300">
 
     <div id="app-container" class="w-full max-w-2xl mx-auto pb-28">
-
-        <!-- Main Content Area -->
         <main>
-            <!-- Food/Home Page -->
             <div id="food-page" class="page-content">
                 <!-- Header -->
                 <header class="p-4">
