@@ -217,11 +217,9 @@
                             }
                         } else if (eventType === 'UPDATE') {
                             if (existingOrderIndex > -1) {
-                                // If order is marked completed, remove it from view
                                 if (newOrderData.status === 'completed') {
                                     orders.splice(existingOrderIndex, 1);
                                 } else {
-                                    // Otherwise, update the order data
                                     orders[existingOrderIndex] = newOrderData;
                                 }
                             }
