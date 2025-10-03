@@ -79,8 +79,11 @@
 
                 <!-- Daily Suggestions Container -->
                 <div id="daily-suggestions-container" class="px-4 py-2 hidden">
-                    <div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <h3 id="daily-suggestions-title" class="font-bold text-gray-800 dark:text-white mb-3">Your usuals...</h3>
+                    <div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 relative">
+                        <button id="close-suggestions-btn" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </button>
+                        <h3 id="daily-suggestions-title" class="font-bold text-gray-800 dark:text-white mb-3 pr-6">Your usuals...</h3>
                         <div id="daily-suggestions-list" class="space-y-3">
                             <!-- Suggestion items will be inserted here -->
                         </div>
@@ -182,6 +185,7 @@
         const suggestionsContainer = document.getElementById('daily-suggestions-container');
         const suggestionsList = document.getElementById('daily-suggestions-list');
         const suggestionsTitle = document.getElementById('daily-suggestions-title');
+        const closeSuggestionsBtn = document.getElementById('close-suggestions-btn');
         const cartViewBar = document.getElementById('cart-view-bar');
         const cartItemCountEl = document.getElementById('cart-item-count');
         const cartTotalPriceEl = document.getElementById('cart-total-price');
@@ -333,6 +337,10 @@
         }
 
         function renderDailySuggestions() {
+            if (sessionStorage.getItem('suggestionsDismissed')) {
+                suggestionsContainer.classList.add('hidden');
+                return;
+            }
             const hour = new Date().getHours();
             let mealTime = '';
             let rawSuggestedItems = null;
@@ -474,7 +482,10 @@
             document.getElementById('cart-modal').addEventListener('click', (e) => { if (e.target.id === 'cart-modal') document.getElementById('cart-modal').classList.add('hidden'); });
             placeOrderBtn.addEventListener('click', placeOrder);
             document.getElementById('logout-btn')?.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
-
+            closeSuggestionsBtn.addEventListener('click', () => {
+                suggestionsContainer.classList.add('hidden');
+                sessionStorage.setItem('suggestionsDismissed', 'true');
+            });
 
             supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
                 const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
