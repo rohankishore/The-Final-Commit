@@ -1,4 +1,4 @@
-# 🛠️ PROJECT TITLE: [INSERT YOUR CREATIVE TITLE HERE]
+# 🛠️ PROJECT TITLE: Q-Less
 
 ## Idea Abstract
 
@@ -11,8 +11,8 @@
 
 | Role | Name | GitHub Profile |
 | :--- | :--- | :--- |
-| **Team Member 1** | [Your Full Name Here] | [@YourGitHubUsername](link to your GitHub profile) |
-| **Team Member 2** | [Your Partner's Full Name Here] | [@PartnerGitHubUsername](link to partner's GitHub profile) |
+| **Team Member 1** | Rohan Kishore | [@rohankishore](https://github.com/rohankishore) |
+| **Team Member 2** | [P Sreesankar] | [@p-sreesankar](https://github.com/p-sreesankar) |
 
 ---
 
@@ -22,9 +22,9 @@ The following core features were successfully implemented and are showcased in t
 
 | Feature | Status | Key Implementation |
 | :--- | :--- | :--- |
-| **Student Ordering Interface** | ✅ COMPLETE | [e.g., Menu browsing, order placement, order history view] |
-| **Staff Live Order Viewer** | ✅ COMPLETE | [e.g., Real-time data feed, filtering by status] |
-| **Staff Payment Verification** | ✅ COMPLETE | [e.g., Staff clicks "Verify" button to change order status] |
+| **Student Ordering Interface** | ✅ COMPLETE | Menu browsing, Order placement, Order History, Dietary Choices, Recurring Orders |
+| **Staff Live Order Viewer** | ✅ COMPLETE | Real-time data feed |
+| **Staff Payment Verification** | ✅ COMPLETE | Staff can either scan QR code or manually click Confirm button |
 
 ---
 
@@ -38,9 +38,9 @@ The link below leads to our mandatory video presentation, which is **not longer 
 
 ### 2. Live Deployment (If Applicable)
 
-Access the live prototype here. (If not deployed, please state 'N/A' or remove this section).
+Access the live prototype here.
 
-➡️ **Live Demo Link:** [Insert Vercel/Netlify/Render Link Here]
+➡️ **Live Demo Link:** https://civilcanteencet.vercel.app/
 
 ---
 
@@ -48,9 +48,9 @@ Access the live prototype here. (If not deployed, please state 'N/A' or remove t
 
 | Category | Technologies Used | Notes |
 | :--- | :--- | :--- |
-| **Frontend** | [e.g., React, Next.js, HTML/CSS] | [e.g., Styled with Tailwind CSS, uses shadcn/ui] |
-| **Backend/Server** | [e.g., Node.js/Express, Python/Flask, N/A] | [e.g., Managed API endpoints/logic] |
-| **Database/BaaS** | [e.g., Firebase Firestore, Supabase, PostgreSQL] | [e.g., Used for storing menu and orders] |
+| **Frontend** | HTML/CSS] | Styled with Tailwind CSS |
+| **Backend/Server** | Supabase | Managed API endpoints/logic, Auth, Order logic |
+| **Database/BaaS** | Supabase | Used for storing menu, user info and orders |
 
 ---
 
@@ -60,11 +60,11 @@ If a judge needs to run your project on their machine, provide clear steps here:
 
 1.  **Clone Your Forked Repository:**
     ```bash
-    git clone [Your Forked Repo URL]
+    git clone https://github.com/rohankishore/The-Final-Commit/
     ```
 2.  **Install Dependencies:**
     ```bash
-    cd your-repo-name
+    cd The-Final-Commit
     npm install  # or yarn install / pip install -r requirements.txt
     ```
 3.  **Setup Environment Variables (Mandatory for DB/Auth):**
