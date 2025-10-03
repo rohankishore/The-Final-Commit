@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CET Civil Canteen - Onboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-lg p-6 m-4">
+
+        <!-- Progress Bar -->
+        <div id="progress-container" class="mb-6 hidden">
+            <div class="flex justify-between items-center mb-1">
+                <p id="step-counter" class="text-sm text-gray-500">Step 1 of 3</p>
+                <p id="step-percentage" class="text-sm font-semibold text-orange-500">33%</p>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-gradient-to-r from-orange-400 to-green-500 h-2 rounded-full transition-all duration-500" style="width: 33%;"></div>
+            </div>
+        </div>
+
+        <!-- Onboarding Container -->
+        <div id="onboarding-container">
+
+            <!-- Step 1: User Auth & Details -->
+            <div id="step-1" class="step active step-transition">
+                <h1 id="auth-title" class="text-3xl font-extrabold gradient-text mb-2">Create Your Profile</h1>
+                <p id="auth-subtitle" class="text-gray-500 mb-8">Let's get to know you.</p>
+                <form id="profile-form" class="space-y-4">
+                    <input type="email" id="email" placeholder="Email Address" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required autocomplete="email">
+                    <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required autocomplete="current-password">
+
+                    <div id="signup-fields" class="space-y-4">
+                        <input type="text" id="name" placeholder="Full Name" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        <input type="tel" id="phone" placeholder="Phone Number" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        <input type="text" id="admission-number" placeholder="Admission Number" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        <select id="department" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="Civil">Civil Engineering</option>
+                            <option value="Mechanical">Mechanical Engineering</option>
+                            <option value="Electrical">Electrical Engineering</option>
+                            <option value="Electronics">Electronics Engineering</option>
+                            <option value="Computer">Computer Science</option>
+                            <option value="Architecture">Architecture</option>
+                        </select>
+                        <select id="semester" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                            <option value="" disabled selected>Select Semester</option>
+                            <option value="1">Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option><option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option><option value="6">Semester 6</option><option value="7">Semester 7</option><option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                </form>
+                <p id="auth-error" class="text-red-500 text-sm mt-4 text-center"></p>
+                <button id="auth-button" class="w-full mt-6 bg-orange-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 shadow-lg shadow-orange-200">Sign Up & Continue</button>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    <span id="auth-toggle-text">Already have an account?</span>
+                    <a href="#" id="auth-toggle-link" class="font-semibold text-orange-600 hover:underline">Log In</a>
+                </p>
+            </div>
+
+            <!-- Step 2: Preference -->
+            <div id="step-2" class="step step-transition">
+                <h1 class="text-3xl font-extrabold gradient-text mb-2">Choose Your Preference</h1>
+                <p class="text-gray-500 mb-8">Let us know what you like to eat</p>
+                <div class="space-y-3">
+                    <button id="pref-veg" class="preference-card w-full text-left p-4 rounded-xl flex items-center">
+                        <div class="bg-green-100 p-2 rounded-lg mr-4"><svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5zm4-2h-2V7h2v5zm0 4h-2v-2h2v2z"></path></svg></div>
+                        <div>
+                            <p class="font-semibold text-gray-800">Vegetarian</p>
+                            <p class="text-sm text-gray-500">Pure veg meals only</p>
+                        </div>
+                    </button>
+                    <button id="pref-nonveg" class="preference-card w-full text-left p-4 rounded-xl flex items-center">
+                         <div class="bg-orange-100 p-2 rounded-lg mr-4"><svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path></svg></div>
+                         <div>
+                            <p class="font-semibold text-gray-800">Non-Vegetarian</p>
+                            <p class="text-sm text-gray-500">Chicken, fish & more</p>
+                        </div>
+                    </button>
+                    <button id="pref-both" class="preference-card w-full text-left p-4 rounded-xl flex items-center">
+                         <div class="bg-blue-100 p-2 rounded-lg mr-4"><svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0a2 2 0 002 2v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 002-2"></path></svg></div>
+                         <div>
+                            <p class="font-semibold text-gray-800">Both</p>
+                            <p class="text-sm text-gray-500">Mix of everything</p>
+                        </div>
+                    </button>
+                </div>
+                <div class="mt-8 flex justify-between">
+                    <button id="step2-back" class="text-gray-600 font-semibold py-3 px-4">Back</button>
+                    <button id="step2-next" class="bg-orange-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-300 shadow-lg shadow-orange-200" disabled>Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Build Menu -->
+            <div id="step-3" class="step step-transition">
+                <h1 class="text-3xl font-extrabold gradient-text mb-2">Build Your Menu</h1>
+                <p class="text-gray-500 mb-6">Add items you frequently order</p>
+                <div class="mb-4">
+                    <label class="font-semibold text-gray-700 block mb-2">Add Your Favorite Items</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="menu-item-input" placeholder="e.g., Chicken Biryani..." class="flex-grow w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <button id="add-item-btn" class="bg-orange-500 text-white font-bold p-3 rounded-lg hover:bg-orange-600 transition duration-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg></button>
+                    </div>
+                </div>
+                <div id="menu-items-list" class="space-y-2 mb-6"></div>
+                <div class="bg-green-50 p-4 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="bg-white p-2 rounded-lg mr-3"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                        <div>
+                            <p class="font-semibold text-gray-800">Save as Daily Menu</p>
+                            <p class="text-sm text-gray-500">Order the same items every day</p>
+                        </div>
+                    </div>
+                    <label for="recurring" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input id="recurring" type="checkbox" class="sr-only">
+                            <div class="block bg-gray-300 w-10 h-6 rounded-full toggle-bg"></div>
+                        </div>
+                    </label>
+                </div>
+                 <div class="mt-8 flex justify-between">
+                    <button id="step3-back" class="text-gray-600 font-semibold py-3 px-4">Back</button>
+                    <button id="step3-next" class="bg-orange-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-300 shadow-lg shadow-orange-200">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Final Commit -->
+            <div id="step-4" class="step step-transition text-center">
+                <h1 class="text-3xl font-extrabold gradient-text mb-2">Make the Final Commit</h1>
+                <p class="text-gray-500 mb-6">Time to push your changes!</p>
+                <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                     <svg class="w-10 h-10 text-orange-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Ready to Commit?</h2>
+                <p class="text-gray-500 mb-8">Review your configuration before making the final commit.</p>
+
+                <div class="space-y-3 text-left">
+                    <div id="review-diet" class="p-4 rounded-xl flex items-center justify-between"></div>
+                    <div id="review-menu" class="p-4 rounded-xl"></div>
+                    <div id="review-recurring" class="p-4 rounded-xl flex items-center justify-between"></div>
+                </div>
+
+                <button id="commit-btn" class="w-full mt-8 bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 shadow-lg shadow-green-200">Commit Preferences</button>
+                <button id="step4-back" class="mt-4 text-gray-500 text-sm font-semibold py-2 px-4">Back</button>
+            </div>
+
+            <!-- Step 5: Success Message -->
+            <div id="step-5" class="step step-transition text-center py-10">
+                 <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-5xl">🎉</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Committed!</h2>
+                <p class="text-gray-600">Welcome aboard! Redirecting to dashboard...</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="module" src="script.js"></script>
+
+</body>
+</html>
+
