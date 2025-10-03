@@ -43,22 +43,35 @@
             </button>
         </header>
 
-        <div id="orders-board" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Daily Sales Section -->
+        <div class="mb-6 bg-white dark:bg-gray-800/50 rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-center sm:text-left">
+                <h3 class="font-bold text-lg">Daily Report</h3>
+                <p id="sales-total" class="text-3xl font-extrabold text-green-600 dark:text-green-400">₹0.00</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Total sales from completed orders today.</p>
+            </div>
+            <button id="calculate-sales-btn" class="w-full sm:w-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">Show Today's Sales</button>
+        </div>
+
+
+        <div id="orders-board" class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <!-- Pending Payment Column -->
             <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
                 <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Pending Payment</h2>
-                <div id="pending-orders-col" class="p-4 space-y-4 order-column">
-                    <!-- Unpaid orders will be inserted here -->
-                </div>
+                <div id="pending-orders-col" class="p-4 space-y-4 order-column"></div>
             </div>
 
             <!-- Ready for Pickup Column -->
             <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
                 <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Ready for Pickup</h2>
-                <div id="ready-orders-col" class="p-4 space-y-4 order-column">
-                    <!-- Paid and ready orders will be inserted here -->
-                </div>
+                <div id="ready-orders-col" class="p-4 space-y-4 order-column"></div>
+            </div>
+
+            <!-- Completed Orders Column -->
+            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Completed Today</h2>
+                <div id="completed-orders-col" class="p-4 space-y-4 order-column"></div>
             </div>
         </div>
     </div>
@@ -93,6 +106,7 @@
         const statusColumns = {
             pending: document.getElementById('pending-orders-col'),
             ready: document.getElementById('ready-orders-col'),
+            completed: document.getElementById('completed-orders-col'),
         };
         const appContent = document.getElementById('app-content');
         const loadingAuth = document.getElementById('loading-auth');
@@ -100,15 +114,22 @@
         const scannerModal = document.getElementById('qr-scanner-modal');
         const closeScannerBtn = document.getElementById('close-scanner-btn');
         const connectionStatusEl = document.getElementById('connection-status');
+        const calculateSalesBtn = document.getElementById('calculate-sales-btn');
+        const salesTotalEl = document.getElementById('sales-total');
 
         function renderOrderCard(order) {
             const itemsHtml = order.items.map(item => `<li class="text-sm">${item.name} x ${item.quantity}</li>`).join('');
 
             let actionButtonHtml = '';
             if (order.status === 'pending') {
-                 actionButtonHtml = `<p class="mt-4 text-center text-xs font-bold text-red-500 uppercase">Waiting for Payment</p>`;
+                 actionButtonHtml = `
+                    <p class="mt-2 text-center text-xs font-bold text-red-500 uppercase">Waiting for Payment</p>
+                    <button data-id="${order.id}" class="manual-confirm-btn w-full mt-2 text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 rounded-md hover:bg-gray-300 transition">Manual Confirm</button>
+                 `;
             } else if (order.status === 'ready') {
                 actionButtonHtml = `<button data-id="${order.id}" data-status="completed" class="update-status-btn w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Mark as Collected</button>`;
+            } else if (order.status === 'completed') {
+                actionButtonHtml = `<p class="mt-4 text-center text-xs font-bold text-green-500 uppercase">Collected</p>`;
             }
 
             return `
@@ -154,6 +175,30 @@
             if (error) console.error('Error updating status:', error);
         }
 
+        async function calculateAndDisplayDailySales() {
+            calculateSalesBtn.disabled = true;
+            calculateSalesBtn.textContent = 'Calculating...';
+
+            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
+
+            const { data, error } = await supabase
+                .from('orders')
+                .select('total_price')
+                .eq('status', 'completed')
+                .gte('created_at', `${today}T00:00:00.000Z`)
+                .lte('created_at', `${today}T23:59:59.999Z`);
+
+            if (error) {
+                console.error("Error calculating sales:", error);
+                salesTotalEl.textContent = 'Error';
+            } else {
+                const totalSales = data.reduce((sum, order) => sum + order.total_price, 0);
+                salesTotalEl.textContent = `₹${totalSales.toFixed(2)}`;
+            }
+            calculateSalesBtn.disabled = false;
+            calculateSalesBtn.textContent = "Show Today's Sales";
+        }
+
         async function initializeStaffView() {
             try {
                 if (SUPABASE_URL === "YOUR_SUPABASE_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
@@ -162,6 +207,7 @@
                 }
                 supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+                // --- ROBUST SECURITY CHECK ---
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) {
                     window.location.replace('/staff_login.html');
@@ -175,7 +221,6 @@
                     .single();
 
                 if (profileError && profileError.code === 'PGRST116') {
-                    console.error("Access Denied: User exists in auth but has no profile entry.");
                     await supabase.auth.signOut();
                     window.location.replace('/staff_login.html');
                     return;
@@ -183,7 +228,6 @@
                 if (profileError) throw profileError;
 
                 if (!profile || profile.role !== 'staff') {
-                    console.error("Access Denied: User is not a staff member.");
                     await supabase.auth.signOut();
                     window.location.replace('/staff_login.html');
                     return;
@@ -192,40 +236,25 @@
                 loadingAuth.style.display = 'none';
                 appContent.style.display = 'block';
 
-                const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready']);
+                // Fetch initial orders (including completed for the sales calculation)
+                const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready', 'completed']);
                 if (error) { console.error('Error fetching initial orders:', error); return; }
                 orders = data;
                 renderAllOrders();
 
                 supabase.channel('public:orders')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-                        console.log('Real-time order change received!', payload);
                         const { eventType, new: newOrderData, old: oldOrderData } = payload;
 
-                        let orderId;
-                        if(eventType === 'DELETE') {
-                            orderId = oldOrderData.id;
-                        } else {
-                            orderId = newOrderData.id;
-                        }
+                        let orderId = eventType === 'DELETE' ? oldOrderData.id : newOrderData.id;
                         const existingOrderIndex = orders.findIndex(o => o.id === orderId);
 
                         if (eventType === 'INSERT') {
-                            if (existingOrderIndex === -1) {
-                                orders.push(newOrderData);
-                            }
+                            if (existingOrderIndex === -1) orders.push(newOrderData);
                         } else if (eventType === 'UPDATE') {
-                            if (existingOrderIndex > -1) {
-                                if (newOrderData.status === 'completed') {
-                                    orders.splice(existingOrderIndex, 1);
-                                } else {
-                                    orders[existingOrderIndex] = newOrderData;
-                                }
-                            }
+                            if (existingOrderIndex > -1) orders[existingOrderIndex] = newOrderData;
                         } else if (eventType === 'DELETE') {
-                             if (existingOrderIndex > -1) {
-                                orders.splice(existingOrderIndex, 1);
-                            }
+                             if (existingOrderIndex > -1) orders.splice(existingOrderIndex, 1);
                         }
                         renderAllOrders();
 
@@ -261,13 +290,22 @@
                 });
 
                 document.getElementById('orders-board').addEventListener('click', (e) => {
-                    const target = e.target.closest('.update-status-btn');
-                    if (target) {
+                    const target = e.target.closest('button');
+                    if (!target) return;
+
+                    if (target.matches('.update-status-btn')) {
                         target.disabled = true;
                         target.textContent = 'Completing...';
                         updateOrderStatus(target.dataset.id, target.dataset.status);
                     }
+                    if (target.matches('.manual-confirm-btn')) {
+                        if(confirm('Are you sure you want to manually confirm payment for this order?')) {
+                            confirmPaymentAndAcceptOrder(target.dataset.id);
+                        }
+                    }
                 });
+
+                calculateSalesBtn.addEventListener('click', calculateAndDisplayDailySales);
 
             } catch(error) {
                 console.error("Initialization failed:", error);
