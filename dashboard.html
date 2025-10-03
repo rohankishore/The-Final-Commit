@@ -35,7 +35,6 @@
     </style>
 
     <script>
-        // Set up Tailwind CSS for class-based dark mode
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -188,7 +187,6 @@
         let currentOrder = null;
         let qrCodeInstance = null;
 
-        // --- UI Element References ---
         const pages = document.querySelectorAll('.page-content');
         const navButtons = document.querySelectorAll('.nav-button');
         const menuContainer = document.getElementById('menu-container');
@@ -210,7 +208,6 @@
         const orderIdDisplay = document.getElementById('order-id-display');
         const closeQrModalBtn = document.getElementById('close-qr-modal-btn');
 
-        // --- Core Functions ---
         async function getSupabaseConfig() {
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
