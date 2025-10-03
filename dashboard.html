@@ -192,13 +192,11 @@
 
         // --- Core Functions ---
         async function getSupabaseConfig() {
-            // --- FOR LOCAL DEVELOPMENT ---
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
             if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
                 return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
             }
-            // --- For Vercel/Production ---
             try {
                 const response = await fetch('/api/config');
                 if (!response.ok) { throw new Error('Failed to fetch config'); }
@@ -351,8 +349,16 @@
 
             const suggestedItems = Array.isArray(rawSuggestedItems) ? rawSuggestedItems : [];
 
+            suggestionsContainer.classList.remove('hidden');
+
             if (suggestedItems.length === 0) {
-                suggestionsContainer.classList.add('hidden');
+                suggestionsTitle.textContent = `Set your daily usuals!`;
+                suggestionsList.innerHTML = `
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Tired of searching? Go to your profile to set your favorite items for the ${mealTime}.
+                    </p>
+                    <a href="profile.html" class="inline-block mt-2 text-sm font-bold text-primary hover:underline">Set Preferences →</a>
+                `;
                 return;
             }
 
@@ -386,8 +392,6 @@
                     </div>`;
                 suggestionsList.innerHTML += itemHtml;
             });
-
-            suggestionsContainer.classList.remove('hidden');
         }
 
         function addToCart(itemId) {
