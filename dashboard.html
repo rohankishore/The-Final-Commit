@@ -105,39 +105,8 @@
                 <div id="menu-container" class="px-4 space-y-4"></div>
             </div>
 
-            <!-- Profile Page -->
-            <div id="profile-page" class="page-content p-4">
-                 <header class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">My Profile</h2>
-                 </header>
-                 <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center space-x-4 mb-6">
-                    <div id="user-initial-profile" class="w-16 h-16 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white font-bold text-2xl">...</div>
-                    <div>
-                        <h3 id="user-name-profile" class="font-bold text-lg text-gray-800 dark:text-white">Loading...</h3>
-                        <p id="user-email-profile" class="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
-                    </div>
-                 </div>
-                <div class="grid grid-cols-1 gap-6">
-                     <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <h2 class="text-base font-bold text-indigo-500 dark:text-indigo-400 mb-4">Details</h2>
-                        <div id="profile-details" class="space-y-3 text-gray-600 dark:text-gray-300"></div>
-                    </div>
-                     <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <h2 class="text-base font-bold text-green-500 dark:text-green-400 mb-4">Dietary Choice</h2>
-                        <div id="diet-preference" class="font-semibold text-lg text-gray-700 dark:text-gray-200"></div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800/50 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <h2 class="text-base font-bold text-gray-500 dark:text-gray-400 mb-4">Settings</h2>
-                        <div class="flex justify-between items-center">
-                            <p class="text-gray-700 dark:text-gray-200">Dark Mode</p>
-                            <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200 dark:bg-gray-600"><span class="sr-only">Enable dark mode</span><span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span></button>
-                        </div>
-                         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                             <button id="logout-btn" class="w-full text-left text-red-500 font-semibold">Log Out</button>
-                         </div>
-                    </div>
-                </div>
-            </div>
+            <!-- This is a placeholder for single-page nav, not used when profile is separate -->
+            <div id="profile-page" class="page-content"></div>
 
              <!-- Orders Page -->
             <div id="orders-page" class="page-content p-4">
@@ -213,6 +182,9 @@
         const suggestionsContainer = document.getElementById('daily-suggestions-container');
         const suggestionsList = document.getElementById('daily-suggestions-list');
         const suggestionsTitle = document.getElementById('daily-suggestions-title');
+        const cartViewBar = document.getElementById('cart-view-bar');
+        const cartItemCountEl = document.getElementById('cart-item-count');
+        const cartTotalPriceEl = document.getElementById('cart-total-price');
 
         // --- Core Functions ---
         async function getSupabaseConfig() {
@@ -259,26 +231,8 @@
             if (!userData) return;
             const { profile, preferences } = userData;
             userProfile = profile;
-            userPreferences = preferences; // Cache preferences
+            userPreferences = preferences;
 
-            if (profile) {
-                const initial = profile.name ? profile.name.charAt(0).toUpperCase() : '?';
-                document.getElementById('user-initial-home').textContent = initial;
-
-                const profilePage = document.getElementById('profile-page');
-                if (profilePage) {
-                    document.getElementById('user-initial-profile').textContent = initial;
-                    document.getElementById('user-name-profile').textContent = profile.name || 'N/A';
-                    document.getElementById('user-email-profile').textContent = user?.email || 'N/A';
-                    document.getElementById('profile-details').innerHTML = `<p><strong>Admission No:</strong> ${profile.admission_number || 'N/A'}</p><p><strong>Department:</strong> ${profile.department || 'N/A'}</p><p><strong>Semester:</strong> ${profile.semester || 'N/A'}</p><p><strong>Phone:</strong> ${profile.phone || 'N/A'}</p>`;
-                }
-            }
-            if (preferences && document.getElementById('diet-preference')) {
-                 document.getElementById('diet-preference').innerHTML = `<p>${preferences.diet || 'Not set'}</p>`;
-            }
-        }
-
-        function populateHeader(profile) {
             if (profile && profile.name) {
                 document.getElementById('user-initial-home').textContent = profile.name.charAt(0).toUpperCase();
             }
@@ -381,13 +335,15 @@
         function renderDailySuggestions() {
             const hour = new Date().getHours();
             let mealTime = '';
-            let suggestedItems = [];
+            let rawSuggestedItems = null;
 
-            if (hour < 12) { mealTime = 'morning'; suggestedItems = userPreferences?.daily_morning || []; }
-            else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; suggestedItems = userPreferences?.daily_afternoon || []; }
-            else { mealTime = 'evening'; suggestedItems = userPreferences?.daily_evening || []; }
+            if (hour < 12) { mealTime = 'morning'; rawSuggestedItems = userPreferences?.daily_morning; }
+            else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; rawSuggestedItems = userPreferences?.daily_afternoon; }
+            else { mealTime = 'evening'; rawSuggestedItems = userPreferences?.daily_evening; }
 
-            if (!suggestedItems || suggestedItems.length === 0) {
+            const suggestedItems = Array.isArray(rawSuggestedItems) ? rawSuggestedItems : [];
+
+            if (suggestedItems.length === 0) {
                 suggestionsContainer.classList.add('hidden');
                 return;
             }
