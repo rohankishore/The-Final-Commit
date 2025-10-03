@@ -5,25 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canteen Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        // Set up Tailwind CSS for class-based dark mode
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            light: '#F97316',
-                            DEFAULT: '#EA580C',
-                            dark: '#C2410C',
-                        },
-                        'dark-bg': '#18171c',
-                    }
-                }
-            }
-        }
-    </script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -48,6 +32,8 @@
         .cart-view {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
+
+        #qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-dark-bg transition-colors duration-300">
@@ -78,31 +64,27 @@
                 </div>
 
                 <!-- Daily Suggestions Container -->
-
-                <!-- Banner -->
-                <div class="px-4 py-2">
-                    <div class="relative rounded-xl overflow-hidden h-40 shadow-lg">
-                        <img src="assets/bg.png" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-                        <div class="relative h-full flex flex-col justify-center items-center text-white text-center p-4">
-                            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Civil Canteen</h2>
-                        </div>
-                    </div>
-                </div>
-
-
                 <div id="daily-suggestions-container" class="px-4 py-2 hidden">
                     <div class="bg-white dark:bg-gray-800/50 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 relative">
                         <button id="close-suggestions-btn" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                         </button>
                         <h3 id="daily-suggestions-title" class="font-bold text-gray-800 dark:text-white mb-3 pr-6">Your usuals...</h3>
-                        <div id="daily-suggestions-list" class="space-y-3">
-                            <!-- Suggestion items will be inserted here -->
-                        </div>
+                        <div id="daily-suggestions-list" class="space-y-3"></div>
+                        <button id="quick-order-btn" class="w-full mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 hidden">Quick Order Usuals</button>
                     </div>
                 </div>
 
+                <!-- Banner -->
+                <div class="px-4 py-2">
+                    <div class="relative rounded-xl overflow-hidden h-40 shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+                        <div class="relative h-full flex flex-col justify-center items-center text-white text-center p-4">
+                            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Civil Canteen</h2>
+                        </div>
+                    </div>
+                </div>
                 <!-- Category Filters -->
                 <div class="py-4">
                     <div id="category-filters" class="category-scroller flex space-x-4 px-4 overflow-x-auto"></div>
@@ -110,9 +92,6 @@
                 <!-- Menu Items -->
                 <div id="menu-container" class="px-4 space-y-4"></div>
             </div>
-
-            <!-- This is a placeholder for single-page nav, not used when profile is separate -->
-            <div id="profile-page" class="page-content"></div>
 
              <!-- Orders Page -->
             <div id="orders-page" class="page-content p-4">
@@ -155,6 +134,18 @@
         </div>
     </div>
 
+    <!-- Payment/QR Modal -->
+    <div id="order-qr-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Order Placed!</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Show this QR code to staff to confirm payment.</p>
+            <div id="qrcode-container" class="mx-auto mb-4 w-48 h-48"></div>
+            <p class="text-sm text-gray-500">Order ID: <span id="order-id-display"></span></p>
+            <p class="text-3xl font-bold text-gray-800 dark:text-white my-4">Total: ₹<span id="payment-total">0</span></p>
+            <button id="close-qr-modal-btn" class="w-full mt-2 text-sm text-gray-500 dark:text-gray-400">Close</button>
+        </div>
+    </div>
+
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div class="flex justify-around max-w-2xl mx-auto">
@@ -176,6 +167,8 @@
         let userProfile = null;
         let userPreferences = null;
         let menuData = [];
+        let currentOrder = null;
+        let qrCodeInstance = null;
 
         // --- UI Element References ---
         const pages = document.querySelectorAll('.page-content');
@@ -192,16 +185,20 @@
         const cartViewBar = document.getElementById('cart-view-bar');
         const cartItemCountEl = document.getElementById('cart-item-count');
         const cartTotalPriceEl = document.getElementById('cart-total-price');
+        const quickOrderBtn = document.getElementById('quick-order-btn');
+        const orderQrModal = document.getElementById('order-qr-modal');
+        const qrCodeContainer = document.getElementById('qrcode-container');
+        const paymentTotalEl = document.getElementById('payment-total');
+        const orderIdDisplay = document.getElementById('order-id-display');
+        const closeQrModalBtn = document.getElementById('close-qr-modal-btn');
 
         // --- Core Functions ---
         async function getSupabaseConfig() {
-            // --- FOR LOCAL DEVELOPMENT ---
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
             if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
                 return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
             }
-            // --- For Vercel/Production ---
             try {
                 const response = await fetch('/api/config');
                 if (!response.ok) { throw new Error('Failed to fetch config'); }
@@ -219,14 +216,9 @@
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
                     supabase.from('preferences').select('*').eq('id', user.id).single()
                 ]);
-
-                if (preferencesRes.error && preferencesRes.error.code === 'PGRST116') {
-                    window.location.replace('/');
-                    return null;
-                }
+                if (preferencesRes.error && preferencesRes.error.code === 'PGRST116') { window.location.replace('/'); return null; }
                 if (profileRes.error) throw profileRes.error;
                 if (preferencesRes.error) throw preferencesRes.error;
-
                 return { profile: profileRes.data, preferences: preferencesRes.data };
             } catch (error) {
                  if (error.code !== 'PGRST116') { console.error('Error fetching user data:', error); }
@@ -239,43 +231,54 @@
             const { profile, preferences } = userData;
             userProfile = profile;
             userPreferences = preferences;
-
             if (profile && profile.name) {
                 document.getElementById('user-initial-home').textContent = profile.name.charAt(0).toUpperCase();
             }
         }
 
-        async function placeOrder() {
-            if (cart.length === 0 || !user || !userProfile) { return; }
-            placeOrderBtn.disabled = true;
-            placeOrderBtn.textContent = 'Placing Order...';
+        async function placeOrderOrQuickOrder(orderCart) {
+            if (orderCart.length === 0 || !user || !userProfile) return;
+
             const order = {
                 user_id: user.id,
                 user_name: userProfile.name,
-                items: cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity, price: item.price})),
-                total_price: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                status: 'pending'
+                items: orderCart.map(item => ({id: item.id, name: item.name, quantity: item.quantity, price: item.price})),
+                total_price: orderCart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                status: 'pending',
+                payment_status: 'unpaid'
             };
-            const { error } = await supabase.from('orders').insert(order);
+
+            const { data, error } = await supabase.from('orders').insert(order).select().single();
+
             if (error) {
-                console.error("Error placing order:", error);
-                alert('Could not place your order. Please try again.');
+                console.error("Error creating order:", error);
+                alert('Could not create order. Please try again.');
+                return;
+            }
+
+            currentOrder = data;
+            paymentTotalEl.textContent = currentOrder.total_price;
+            orderIdDisplay.textContent = currentOrder.id.substring(0, 8);
+
+            if (qrCodeInstance) {
+                qrCodeInstance.clear();
+                qrCodeInstance.makeCode(currentOrder.id);
             } else {
-                alert('Order placed successfully!');
+                qrCodeInstance = new QRCode(qrCodeContainer, { text: currentOrder.id, width: 180, height: 180 });
+            }
+
+            orderQrModal.classList.remove('hidden');
+            orderQrModal.classList.add('flex');
+
+            if (cart.length > 0) {
                 cart = [];
                 updateCartAndMenu();
                 document.getElementById('cart-modal').classList.add('hidden');
-                showPage('orders-page');
             }
-            placeOrderBtn.disabled = false;
-            placeOrderBtn.textContent = 'Place Order';
         }
 
         function renderMyOrders(orders) {
-            if (!orders || orders.length === 0) {
-                myOrdersContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>`;
-                return;
-            }
+            if (!orders || orders.length === 0) { myOrdersContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>`; return; }
             const statusStyles = { pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', preparing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300' };
             myOrdersContainer.innerHTML = orders.map(order => {
                 const itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
@@ -321,17 +324,7 @@
                         <p class="mt-2 font-bold text-gray-700 dark:text-gray-200 ml-6">₹${item.price}</p>
                     </div>
                     <div id="add-btn-container-${item.id}" class="flex-shrink-0">
-                        ${quantity > 0 ? `
-                            <div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg">
-                                <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
-                                <span class="px-2 py-1">${quantity}</span>
-                                <button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button>
-                            </div>
-                        ` : `
-                            <button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}" ${!isAvailable ? 'disabled' : ''}>
-                                ${!isAvailable ? 'UNAVAILABLE' : 'ADD'}
-                            </button>
-                        `}
+                        ${quantity > 0 ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg"><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="px-2 py-1">${quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn px-6 py-2 border border-primary text-primary rounded-lg font-bold text-sm hover:bg-primary/10 transition" data-id="${item.id}" ${!isAvailable ? 'disabled' : ''}>${!isAvailable ? 'UNAVAILABLE' : 'ADD'}</button>`}
                     </div>
                     ${!isAvailable ? `<div class="absolute inset-0 bg-black bg-opacity-60 rounded-xl"></div>` : ''}
                 </div>`;
@@ -344,30 +337,28 @@
                 suggestionsContainer.classList.add('hidden');
                 return;
             }
-
             const hour = new Date().getHours();
             let mealTime = '';
-            let suggestedItems = null;
+            let rawSuggestedItems = null;
 
             if (userPreferences) {
-                if (hour < 12) { mealTime = 'morning'; suggestedItems = userPreferences.daily_morning; }
-                else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; suggestedItems = userPreferences.daily_afternoon; }
-                else { mealTime = 'evening'; suggestedItems = userPreferences.daily_evening; }
+                if (hour < 12) { mealTime = 'morning'; rawSuggestedItems = userPreferences.daily_morning; }
+                else if (hour >= 12 && hour < 17) { mealTime = 'afternoon'; rawSuggestedItems = userPreferences.daily_afternoon; }
+                else { mealTime = 'evening'; rawSuggestedItems = userPreferences.daily_evening; }
             }
 
             suggestionsContainer.classList.remove('hidden');
 
-            if (!Array.isArray(suggestedItems) || suggestedItems.length === 0) {
+            const suggestedItems = Array.isArray(rawSuggestedItems) ? rawSuggestedItems : [];
+
+            if (suggestedItems.length === 0) {
+                quickOrderBtn.classList.add('hidden');
                 suggestionsTitle.textContent = `Set your daily usuals!`;
-                suggestionsList.innerHTML = `
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Tired of searching? Go to your profile to set your favorite items for the ${mealTime || 'day'}.
-                    </p>
-                    <a href="profile.html" class="inline-block mt-2 text-sm font-bold text-primary hover:underline">Set Preferences →</a>
-                `;
+                suggestionsList.innerHTML = `<p class="text-sm text-gray-500 dark:text-gray-400">Tired of searching? Go to your profile to set your favorite items for the ${mealTime || 'day'}.</p><a href="profile.html" class="inline-block mt-2 text-sm font-bold text-primary hover:underline">Set Preferences →</a>`;
                 return;
             }
 
+            quickOrderBtn.classList.remove('hidden');
             suggestionsTitle.textContent = `Your usuals for this ${mealTime}`;
             suggestionsList.innerHTML = '';
 
@@ -379,30 +370,18 @@
                 const cartItem = cart.find(ci => ci.id === menuItem.id);
                 const inCart = cartItem && cartItem.quantity > 0;
 
-                let buttonHtml = '';
-                if (inCart) {
-                    buttonHtml = `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg text-sm"><button class="px-3 py-1 cart-quantity-btn" data-id="${menuItem.id}" data-action="decrease">-</button><span class="px-2 py-1">${cartItem.quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${menuItem.id}" data-action="increase">+</button></div>`;
-                } else {
-                    buttonHtml = `<button class="add-to-cart-btn text-sm px-4 py-1.5 border border-primary text-primary rounded-lg font-bold hover:bg-primary/10 transition" data-id="${menuItem.id}" ${!isAvailable ? 'disabled' : ''}>${isAvailable ? 'ADD' : 'Unavailable'}</button>`;
-                }
+                let buttonHtml = inCart ? `<div class="flex items-center justify-center bg-primary text-white rounded-lg font-bold shadow-lg text-sm"><button class="px-3 py-1 cart-quantity-btn" data-id="${menuItem.id}" data-action="decrease">-</button><span class="px-2 py-1">${cartItem.quantity}</span><button class="px-3 py-1 cart-quantity-btn" data-id="${menuItem.id}" data-action="increase">+</button></div>` : `<button class="add-to-cart-btn text-sm px-4 py-1.5 border border-primary text-primary rounded-lg font-bold hover:bg-primary/10 transition" data-id="${menuItem.id}" ${!isAvailable ? 'disabled' : ''}>${isAvailable ? 'ADD' : 'Unavailable'}</button>`;
 
-                const itemHtml = `
-                    <div class="flex justify-between items-center ${!isAvailable ? 'opacity-50' : ''}">
-                        <div>
-                            <p class="font-semibold text-gray-800 dark:text-gray-200">${menuItem.name}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">₹${menuItem.price}</p>
-                        </div>
-                        <div id="suggestion-btn-container-${menuItem.id}">
-                            ${buttonHtml}
-                        </div>
-                    </div>`;
+                const itemHtml = `<div class="flex justify-between items-center ${!isAvailable ? 'opacity-50' : ''}"><div><p class="font-semibold text-gray-800 dark:text-gray-200">${menuItem.name}</p><p class="text-sm text-gray-500 dark:text-gray-400">₹${menuItem.price}</p></div><div id="suggestion-btn-container-${menuItem.id}">${buttonHtml}</div></div>`;
                 suggestionsList.innerHTML += itemHtml;
             });
         }
 
         function addToCart(itemId) {
+            const itemToAdd = menuData.find(item => item.id === itemId);
+            if (!itemToAdd) return;
             const itemInCart = cart.find(item => item.id === itemId);
-            if (itemInCart) { itemInCart.quantity++; } else { const itemToAdd = menuData.find(item => item.id === itemId); cart.push({ ...itemToAdd, quantity: 1 }); }
+            if (itemInCart) { itemInCart.quantity++; } else { cart.push({ ...itemToAdd, quantity: 1 }); }
             updateCartAndMenu();
         }
 
@@ -416,10 +395,6 @@
             const cartModal = document.getElementById('cart-modal');
             const cartItemsContainer = document.getElementById('cart-items-container');
             const cartModalTotal = document.getElementById('cart-modal-total');
-            const cartViewBar = document.getElementById('cart-view-bar');
-            const cartItemCountEl = document.getElementById('cart-item-count');
-            const cartTotalPriceEl = document.getElementById('cart-total-price');
-
             if (cart.length === 0) { cartViewBar.classList.add('translate-y-24', 'opacity-0'); cartModal.classList.add('hidden'); return; }
             cartViewBar.classList.remove('translate-y-24', 'opacity-0');
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -432,9 +407,7 @@
 
         function updateCartAndMenu() {
             updateCartUI();
-            if (userPreferences) {
-                renderDailySuggestions();
-            }
+            if (userPreferences) { renderDailySuggestions(); }
             const activeFilter = document.querySelector('.category-btn.active')?.dataset.filter || 'all';
             const searchTerm = searchInput.value.toLowerCase();
             renderMenu(activeFilter, searchTerm);
@@ -450,8 +423,6 @@
         async function initializeDashboard() {
             const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDarkMode) document.documentElement.classList.add('dark');
-            const themeToggle = document.getElementById('theme-toggle');
-            if(themeToggle) themeToggle.addEventListener('click', () => { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); });
 
             const config = await getSupabaseConfig();
             if (!config) return;
@@ -491,13 +462,17 @@
             document.getElementById('view-cart-btn').addEventListener('click', () => document.getElementById('cart-modal').classList.remove('hidden'));
             document.getElementById('close-cart-btn').addEventListener('click', () => document.getElementById('cart-modal').classList.add('hidden'));
             document.getElementById('cart-modal').addEventListener('click', (e) => { if (e.target.id === 'cart-modal') document.getElementById('cart-modal').classList.add('hidden'); });
-            placeOrderBtn.addEventListener('click', placeOrder);
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('/'); });
-            closeSuggestionsBtn.addEventListener('click', () => {
-                suggestionsContainer.classList.add('hidden');
-                sessionStorage.setItem('suggestionsDismissed', 'true');
+            placeOrderBtn.addEventListener('click', () => placeOrderOrQuickOrder([...cart]));
+            quickOrderBtn.addEventListener('click', () => {
+                const hour = new Date().getHours();
+                let suggestedItemNames = [];
+                if (hour < 12) { suggestedItemNames = userPreferences?.daily_morning || []; }
+                else if (hour >= 12 && hour < 17) { suggestedItemNames = userPreferences?.daily_afternoon || []; }
+                else { suggestedItemNames = userPreferences?.daily_evening || []; }
+                const quickOrderCart = suggestedItemNames.map(name => menuData.find(item => item.name === name && item.is_available)).filter(Boolean).map(item => ({...item, quantity: 1}));
+                if (quickOrderCart.length > 0) { placeOrderOrQuickOrder(quickOrderCart); } else { alert("None of your usual items are available right now."); }
             });
+            closeQrModalBtn.addEventListener('click', () => { orderQrModal.classList.add('hidden'); orderQrModal.classList.remove('flex'); });
 
             supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
                 const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
@@ -521,8 +496,7 @@
             pages.forEach(p => p.classList.toggle('active', p.id === pageId));
             document.querySelectorAll('.nav-button').forEach(b => {
                 const isButtonActive = b.dataset.page === pageId;
-                const isLinkActive = b.href && ( (pageId === 'orders-page' && b.href.includes('#orders')) || (pageId !=='orders-page' && !b.href.includes('#orders')) );
-
+                const isLinkActive = b.href && ( (pageId === 'orders-page' && b.href.includes('#orders')) || (pageId === 'food-page' && !b.href.includes('#') && !b.href.includes('profile')) );
                 b.classList.toggle('active', isButtonActive || isLinkActive);
             });
         }
