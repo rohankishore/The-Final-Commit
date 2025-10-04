@@ -33,7 +33,7 @@ The following core features were successfully implemented and are showcased in t
 
 The link below leads to our mandatory video presentation, which is **not longer than 5 minutes**.
 
-➡️ **YouTube Video Link:** **[INSERT YOUR PUBLIC YOUTUBE LINK HERE]**
+➡️ **YouTube Video Link:** **[https://youtube.com/shorts/qQX0Bjd1TBo]**
 
 ### 2. Live Deployment (If Applicable)
 
