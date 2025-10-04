@@ -222,6 +222,15 @@
             generateTopItemsBtn.textContent = 'Generate Report';
         }
 
+        async function fetchAndRenderAllData() {
+            const [ordersRes, menuRes] = await Promise.all([
+                supabase.from('orders').select('*').in('status', ['pending', 'ready', 'completed']),
+                supabase.from('menu_items').select('*').order('id')
+            ]);
+            if (ordersRes.error) console.error('Error fetching orders:', ordersRes.error); else { orders = ordersRes.data; renderAllOrders(); }
+            if (menuRes.error) console.error('Error fetching menu:', menuRes.error); else { menuItems = menuRes.data; renderAllMenuItems(); }
+        }
+
         async function initializeStaffView() {
             try {
                 if (SUPABASE_URL === "YOUR_SUPABASE_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
@@ -244,34 +253,18 @@
                 loadingAuth.style.display = 'none';
                 appContent.style.display = 'block';
 
-                const [ordersRes, menuRes] = await Promise.all([
-                    supabase.from('orders').select('*').in('status', ['pending', 'ready', 'completed']),
-                    supabase.from('menu_items').select('*').order('id')
-                ]);
-                if (ordersRes.error) console.error('Error fetching orders:', ordersRes.error); else { orders = ordersRes.data; renderAllOrders(); }
-                if (menuRes.error) console.error('Error fetching menu:', menuRes.error); else { menuItems = menuRes.data; renderAllMenuItems(); }
+                await fetchAndRenderAllData();
 
-                supabase.channel('public:orders')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-                        const { eventType, new: newOrderData, old: oldOrderData } = payload;
-                        let orderId = eventType === 'DELETE' ? oldOrderData.id : newOrderData.id;
-                        const existingOrderIndex = orders.findIndex(o => o.id === orderId);
-
-                        if (eventType === 'INSERT') { if (existingOrderIndex === -1) orders.push(newOrderData); }
-                        else if (eventType === 'UPDATE') { if (existingOrderIndex > -1) orders[existingOrderIndex] = newOrderData; }
-                        else if (eventType === 'DELETE') { if (existingOrderIndex > -1) orders.splice(existingOrderIndex, 1); }
-                        renderAllOrders();
+                // --- FULLY REAL-TIME SUBSCRIPTION ---
+                supabase.channel('public-changes')
+                    .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+                        console.log('Database change detected!', payload);
+                        // Simply re-fetch all data to ensure UI is perfectly in sync
+                        fetchAndRenderAllData();
                     }).subscribe(status => {
                         if (status === 'SUBSCRIBED') { connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-gray-500">Connected</span>`; }
                         else { connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-sm font-medium text-gray-500">Connection Error</span>`; }
                     });
-
-                supabase.channel('public:menu_items')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => {
-                        const updatedItem = payload.new;
-                        const index = menuItems.findIndex(item => item.id === updatedItem.id);
-                        if (index > -1) { menuItems[index] = updatedItem; renderAllMenuItems(); }
-                    }).subscribe();
 
                 html5QrCode = new Html5Qrcode("qr-reader-container");
                 const qrCodeSuccessCallback = (decodedText) => {
@@ -293,6 +286,12 @@
                     if (!target) return;
                     if (target.matches('.update-status-btn')) { target.disabled = true; target.textContent = '...'; updateOrderStatus(target.dataset.id, target.dataset.status); }
                     if (target.matches('.manual-confirm-btn')) { if(confirm('Manually confirm payment for this order?')) { confirmPaymentAndAcceptOrder(target.dataset.id); } }
+                });
+
+                menuManagementBoard.addEventListener('change', e => {
+                    if (e.target.matches('.menu-availability-toggle')) {
+                        updateItemAvailability(e.target.dataset.id, e.target.checked);
+                    }
                 });
 
                 calculateSalesBtn.addEventListener('click', calculateAndDisplayDailySales);
