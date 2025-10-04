@@ -25,6 +25,43 @@
         #qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
         #veg-only-toggle.active { background-color: #16A34A; }
         #veg-only-toggle.active span { transform: translateX(1.25rem); }
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #4CAF50;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #4CAF50;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
+        @keyframes fill {
+            100% { box-shadow: inset 0px 0px 0px 40px #4CAF50; }
+        }
     </style>
     <script>
         tailwind.config = {
@@ -73,7 +110,7 @@
                 </div>
                 <div class="px-4 py-2">
                     <div class="relative rounded-xl overflow-hidden h-40 shadow-lg">
-                        <img src="assets/bg.png" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop" alt="Canteen Banner" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
                         <div class="relative h-full flex flex-col justify-center items-center text-white text-center p-4">
                             <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Civil Canteen</h2>
@@ -131,6 +168,16 @@
                 <span>Total:</span>
                 <span>₹<span id="details-order-total"></span></span>
             </div>
+        </div>
+    </div>
+    <div id="payment-success-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-xl p-8 w-full max-w-xs text-center">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-4">Payment Confirmed!</h2>
+            <p class="text-gray-600 dark:text-gray-400">Your order is now being prepared.</p>
         </div>
     </div>
     <nav class="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm border-t dark:border-gray-700 shadow-lg">
@@ -486,17 +533,24 @@
                 orderDetailsModal.classList.remove('flex');
             });
 
-            supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, async (payload) => {
-                 console.log('Order change received!', payload);
-                if (payload.eventType === 'UPDATE' && currentOrder && payload.new.id === currentOrder.id && payload.new.payment_status === 'paid') {
-                    orderQrModal.classList.add('hidden');
-                    orderQrModal.classList.remove('flex');
-                    alert("Payment confirmed! Your order is being prepared.");
-                    currentOrder = null;
-                }
-                const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-                renderMyOrders(updatedOrders);
-            }).subscribe();
+            supabase.channel('public:orders:user_id=eq.'+user.id)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, async (payload) => {
+                    if (payload.eventType === 'UPDATE' && currentOrder && payload.new.id === currentOrder.id && payload.new.payment_status === 'paid') {
+                        orderQrModal.classList.add('hidden');
+                        orderQrModal.classList.remove('flex');
+                        currentOrder = null;
+                        const successModal = document.getElementById('payment-success-modal');
+                        successModal.classList.remove('hidden');
+                        successModal.classList.add('flex');
+                        setTimeout(() => {
+                            successModal.classList.add('hidden');
+                            successModal.classList.remove('flex');
+                            showPage('orders-page');
+                        }, 2000);
+                    }
+                    const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+                    renderMyOrders(updatedOrders);
+                }).subscribe();
 
             supabase.channel('public:menu_items')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => {
