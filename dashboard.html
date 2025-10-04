@@ -22,7 +22,7 @@
         }
         .nav-button.active svg, .nav-button.active p { color: #EA580C; }
         .category-scroller::-webkit-scrollbar { display: none; }
-        #qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
+        #qrcode-container, #details-qrcode-container { display: flex; justify-content: center; align-items: center; padding: 1rem; background: white; border-radius: 0.5rem; }
         #veg-only-toggle.active { background-color: #16A34A; }
         #veg-only-toggle.active span { transform: translateX(1.25rem); }
         .checkmark__circle {
@@ -156,10 +156,17 @@
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Order Details</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400">ID: <span id="details-order-id"></span></p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Placed: <span id="details-order-time"></span></p>
-            <div id="details-payment-verified" class="hidden items-center justify-center space-x-2 text-green-600 dark:text-green-400 mb-4">
-                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                <span class="font-bold text-lg">Payment Verified</span>
+
+            <div id="details-qr-code-section" class="hidden my-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Show this to staff for payment:</p>
+                <div id="details-qrcode-container" class="mx-auto w-48 h-48"></div>
             </div>
+
+            <div id="details-payment-verified" class="hidden items-center justify-center space-x-2 text-green-600 dark:text-green-400 my-4">
+                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span class="font-bold text-xl">Payment Verified</span>
+            </div>
+
             <div class="text-left my-6 border-t border-b border-gray-200 dark:border-gray-700 py-4">
                  <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Items:</h3>
                  <ul id="details-order-items" class="space-y-2 text-lg text-gray-800 dark:text-white"></ul>
@@ -199,6 +206,7 @@
         let menuData = [];
         let currentOrder = null;
         let qrCodeInstance = null;
+        let detailsQrCodeInstance = null;
 
         const pages = document.querySelectorAll('.page-content');
         const navButtons = document.querySelectorAll('.nav-button');
@@ -223,6 +231,8 @@
         const vegOnlyToggle = document.getElementById('veg-only-toggle');
         const orderDetailsModal = document.getElementById('order-details-modal');
         const closeOrderDetailsBtn = document.getElementById('close-order-details-btn');
+        const detailsQrCodeContainer = document.getElementById('details-qrcode-container');
+        const detailsQrCodeSection = document.getElementById('details-qr-code-section');
 
         async function getSupabaseConfig() {
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
@@ -318,12 +328,22 @@
             document.getElementById('details-order-items').innerHTML = order.items.map(item => `<li class="font-semibold">- ${item.name} <span class="font-normal text-gray-500 dark:text-gray-400">x ${item.quantity}</span></li>`).join('');
 
             const paymentVerifiedEl = document.getElementById('details-payment-verified');
+
             if (order.payment_status === 'paid') {
                 paymentVerifiedEl.classList.remove('hidden');
                 paymentVerifiedEl.classList.add('flex');
+                detailsQrCodeSection.classList.add('hidden');
             } else {
                 paymentVerifiedEl.classList.add('hidden');
                 paymentVerifiedEl.classList.remove('flex');
+                detailsQrCodeSection.classList.remove('hidden');
+
+                if (detailsQrCodeInstance) {
+                    detailsQrCodeInstance.clear();
+                    detailsQrCodeInstance.makeCode(order.id);
+                } else {
+                    detailsQrCodeInstance = new QRCode(detailsQrCodeContainer, { text: order.id, width: 180, height: 180 });
+                }
             }
 
             orderDetailsModal.classList.remove('hidden');
