@@ -24,6 +24,12 @@
         body { font-family: 'Inter', sans-serif; }
         .order-column { min-height: 80vh; }
         #qr-reader-container { width: 100%; max-width: 500px; }
+        .tab-button.active {
+            border-bottom-color: #EA580C;
+            color: #EA580C;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-gray-200">
@@ -31,7 +37,7 @@
     <div id="app-content" class="container mx-auto p-4 hidden">
         <header class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
             <div class="flex items-center space-x-4">
-                <h1 class="text-3xl font-bold">Live Orders</h1>
+                <h1 class="text-3xl font-bold">Staff Dashboard</h1>
                 <div id="connection-status" class="flex items-center space-x-2">
                     <div class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
                     <span class="text-sm font-medium text-gray-500">Connecting...</span>
@@ -43,35 +49,58 @@
             </button>
         </header>
 
-        <!-- Daily Sales Section -->
-        <div class="mb-6 bg-white dark:bg-gray-800/50 rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="text-center sm:text-left">
-                <h3 class="font-bold text-lg">Daily Report</h3>
-                <p id="sales-total" class="text-3xl font-extrabold text-green-600 dark:text-green-400">₹0.00</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Total sales from completed orders today.</p>
-            </div>
-            <button id="calculate-sales-btn" class="w-full sm:w-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">Show Today's Sales</button>
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+            <nav class="flex space-x-8" aria-label="Tabs">
+                <button class="tab-button active font-semibold whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400" data-tab="orders">Live Orders</button>
+                <button class="tab-button font-semibold whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400" data-tab="menu">Menu Management</button>
+                <button class="tab-button font-semibold whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400" data-tab="reports">Reports</button>
+            </nav>
         </div>
 
-
-        <div id="orders-board" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            <!-- Pending Payment Column -->
-            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Pending Payment</h2>
-                <div id="pending-orders-col" class="p-4 space-y-4 order-column"></div>
+        <!-- Orders Tab -->
+        <div id="orders-tab" class="tab-content active">
+            <div id="orders-board" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                    <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Pending Payment</h2>
+                    <div id="pending-orders-col" class="p-4 space-y-4 order-column"></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                    <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Ready for Pickup</h2>
+                    <div id="ready-orders-col" class="p-4 space-y-4 order-column"></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
+                    <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Completed Today</h2>
+                    <div id="completed-orders-col" class="p-4 space-y-4 order-column"></div>
+                </div>
             </div>
+        </div>
 
-            <!-- Ready for Pickup Column -->
-            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Ready for Pickup</h2>
-                <div id="ready-orders-col" class="p-4 space-y-4 order-column"></div>
-            </div>
+        <!-- Menu Management Tab -->
+        <div id="menu-tab" class="tab-content">
+            <div id="menu-management-board" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
 
-            <!-- Completed Orders Column -->
-            <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-700">Completed Today</h2>
-                <div id="completed-orders-col" class="p-4 space-y-4 order-column"></div>
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md p-4">
+                     <h3 class="font-bold text-lg mb-2">Daily Sales Report</h3>
+                     <div class="flex items-center justify-between">
+                        <div>
+                             <p id="sales-total" class="text-3xl font-extrabold text-green-600 dark:text-green-400">₹0.00</p>
+                             <p class="text-xs text-gray-500 dark:text-gray-400">Total revenue from completed orders today.</p>
+                        </div>
+                        <button id="calculate-sales-btn" class="bg-gray-200 dark:bg-gray-700 font-semibold py-2 px-4 rounded-lg">Calculate</button>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800/50 rounded-lg shadow-md p-4">
+                    <h3 class="font-bold text-lg mb-2">Top 5 Selling Items (Today)</h3>
+                    <ul id="top-items-list" class="space-y-2 text-sm">
+                        <li class="text-gray-500">Click "Generate Report" to see data.</li>
+                    </ul>
+                     <button id="generate-top-items-btn" class="w-full mt-4 bg-gray-200 dark:bg-gray-700 font-semibold py-2 px-4 rounded-lg">Generate Report</button>
+                </div>
             </div>
         </div>
     </div>
@@ -96,18 +125,15 @@
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-        const SUPABASE_URL = "https://aieuyzdfsuczuidhrgot.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZXV5emRmc3VjenVpZGhyZ290Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzA3NDEsImV4cCI6MjA3NTA0Njc0MX0.mpGcYxjoPXBD2G4eo_GFJqbxsH4UVCxR_-KVDoQMWxY";
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
         let supabase = null;
         let orders = [];
+        let menuItems = [];
         let html5QrCode = null;
 
-        const statusColumns = {
-            pending: document.getElementById('pending-orders-col'),
-            ready: document.getElementById('ready-orders-col'),
-            completed: document.getElementById('completed-orders-col'),
-        };
+        const statusColumns = { pending: document.getElementById('pending-orders-col'), ready: document.getElementById('ready-orders-col'), completed: document.getElementById('completed-orders-col') };
         const appContent = document.getElementById('app-content');
         const loadingAuth = document.getElementById('loading-auth');
         const scanQrBtn = document.getElementById('scan-qr-btn');
@@ -116,33 +142,23 @@
         const connectionStatusEl = document.getElementById('connection-status');
         const calculateSalesBtn = document.getElementById('calculate-sales-btn');
         const salesTotalEl = document.getElementById('sales-total');
+        const generateTopItemsBtn = document.getElementById('generate-top-items-btn');
+        const topItemsList = document.getElementById('top-items-list');
+        const menuManagementBoard = document.getElementById('menu-management-board');
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         function renderOrderCard(order) {
             const itemsHtml = order.items.map(item => `<li class="text-sm">${item.name} x ${item.quantity}</li>`).join('');
-
             let actionButtonHtml = '';
             if (order.status === 'pending') {
-                 actionButtonHtml = `
-                    <p class="mt-2 text-center text-xs font-bold text-red-500 uppercase">Waiting for Payment</p>
-                    <button data-id="${order.id}" class="manual-confirm-btn w-full mt-2 text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 rounded-md hover:bg-gray-300 transition">Manual Confirm</button>
-                 `;
+                 actionButtonHtml = `<p class="mt-2 text-center text-xs font-bold text-red-500 uppercase">Waiting for Payment</p><button data-id="${order.id}" class="manual-confirm-btn w-full mt-2 text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2 rounded-md hover:bg-gray-300 transition">Manual Confirm</button>`;
             } else if (order.status === 'ready') {
                 actionButtonHtml = `<button data-id="${order.id}" data-status="completed" class="update-status-btn w-full mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Mark as Collected</button>`;
             } else if (order.status === 'completed') {
                 actionButtonHtml = `<p class="mt-4 text-center text-xs font-bold text-green-500 uppercase">Collected</p>`;
             }
-
-            return `
-                <div id="order-${order.id}" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold">${order.user_name || 'Guest'}</h3>
-                        <span class="font-bold text-lg">₹${order.total_price}</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-2">Order #${order.id.substring(0, 8)}</p>
-                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-400">${itemsHtml}</ul>
-                    ${actionButtonHtml}
-                </div>
-            `;
+            return `<div id="order-${order.id}" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow-sm border ${order.payment_status === 'paid' ? 'border-green-500' : 'border-gray-200 dark:border-gray-700'}"><div class="flex justify-between items-center"><h3 class="font-bold">${order.user_name || 'Guest'}</h3><span class="font-bold text-lg">₹${order.total_price}</span></div><p class="text-xs text-gray-500 mb-2">Order #${order.id.substring(0, 8)}</p><ul class="list-disc list-inside text-gray-600 dark:text-gray-400">${itemsHtml}</ul>${actionButtonHtml}</div>`;
         }
 
         function renderAllOrders() {
@@ -155,19 +171,24 @@
             });
         }
 
-        async function confirmPaymentAndAcceptOrder(orderId) {
-            const { error } = await supabase
-                .from('orders')
-                .update({ payment_status: 'paid', status: 'ready' })
-                .eq('id', orderId)
-                .eq('status', 'pending');
+        function renderMenuItem(item) {
+            return `<div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border dark:border-gray-700 flex justify-between items-center"><div><p class="font-bold">${item.name}</p><p class="text-sm text-gray-500 dark:text-gray-400">₹${item.price}</p></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" value="" class="sr-only peer menu-availability-toggle" data-id="${item.id}" ${item.is_available ? 'checked' : ''}><div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div></label></div>`;
+        }
 
-            if (error) {
-                console.error("Error confirming payment:", error);
-                alert("Failed to verify payment. The order might already be processed or does not exist.");
-            } else {
-                console.log(`Order ${orderId.substring(0,8)} confirmed and moved to 'Ready'.`);
-            }
+        function renderAllMenuItems() {
+            if (!menuManagementBoard) return;
+            menuManagementBoard.innerHTML = menuItems.map(renderMenuItem).join('');
+        }
+
+        async function updateItemAvailability(itemId, isAvailable) {
+            const { error } = await supabase.from('menu_items').update({ is_available: isAvailable }).eq('id', itemId);
+            if (error) console.error("Error updating item availability:", error);
+        }
+
+        async function confirmPaymentAndAcceptOrder(orderId) {
+            const { error } = await supabase.from('orders').update({ payment_status: 'paid', status: 'ready' }).eq('id', orderId).eq('status', 'pending');
+            if (error) { console.error("Error confirming payment:", error); alert("Failed to verify payment."); }
+            else { console.log(`Order ${orderId.substring(0,8)} confirmed.`); }
         }
 
         async function updateOrderStatus(orderId, newStatus) {
@@ -178,25 +199,26 @@
         async function calculateAndDisplayDailySales() {
             calculateSalesBtn.disabled = true;
             calculateSalesBtn.textContent = 'Calculating...';
-
-            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
-
-            const { data, error } = await supabase
-                .from('orders')
-                .select('total_price')
-                .eq('status', 'completed')
-                .gte('created_at', `${today}T00:00:00.000Z`)
-                .lte('created_at', `${today}T23:59:59.999Z`);
-
-            if (error) {
-                console.error("Error calculating sales:", error);
-                salesTotalEl.textContent = 'Error';
-            } else {
-                const totalSales = data.reduce((sum, order) => sum + order.total_price, 0);
-                salesTotalEl.textContent = `₹${totalSales.toFixed(2)}`;
-            }
+            const today = new Date().toISOString().slice(0, 10);
+            const { data, error } = await supabase.from('orders').select('total_price').eq('status', 'completed').gte('created_at', `${today}T00:00:00.000Z`).lte('created_at', `${today}T23:59:59.999Z`);
+            if (error) { console.error("Error calculating sales:", error); salesTotalEl.textContent = 'Error'; }
+            else { const totalSales = data.reduce((sum, order) => sum + order.total_price, 0); salesTotalEl.textContent = `₹${totalSales.toFixed(2)}`; }
             calculateSalesBtn.disabled = false;
-            calculateSalesBtn.textContent = "Show Today's Sales";
+            calculateSalesBtn.textContent = "Calculate";
+        }
+
+        async function generateTopItemsReport() {
+            generateTopItemsBtn.disabled = true;
+            generateTopItemsBtn.textContent = 'Generating...';
+            topItemsList.innerHTML = `<li>Calculating...</li>`;
+            const { data, error } = await supabase.rpc('get_top_selling_items_today');
+            if (error) { console.error("Error generating top items report:", error); topItemsList.innerHTML = `<li class="text-red-500">Error generating report.</li>`; }
+            else {
+                if (data.length === 0) { topItemsList.innerHTML = `<li>No completed orders today.</li>`; }
+                else { topItemsList.innerHTML = data.map((item, index) => `<li class="flex justify-between items-center"><span><strong>#${index + 1}</strong> ${item.name}</span><span class="font-bold">${item.total_quantity} sold</span></li>`).join('');}
+            }
+            generateTopItemsBtn.disabled = false;
+            generateTopItemsBtn.textContent = 'Generate Report';
         }
 
         async function initializeStaffView() {
@@ -207,27 +229,12 @@
                 }
                 supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // --- ROBUST SECURITY CHECK ---
                 const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    window.location.replace('/staff_login.html');
-                    return;
-                }
+                if (!session) { window.location.replace('/staff_login.html'); return; }
 
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', session.user.id)
-                    .single();
+                const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
 
-                if (profileError && profileError.code === 'PGRST116') {
-                    await supabase.auth.signOut();
-                    window.location.replace('/staff_login.html');
-                    return;
-                }
-                if (profileError) throw profileError;
-
-                if (!profile || profile.role !== 'staff') {
+                if (profileError || !profile || profile.role !== 'staff') {
                     await supabase.auth.signOut();
                     window.location.replace('/staff_login.html');
                     return;
@@ -236,38 +243,37 @@
                 loadingAuth.style.display = 'none';
                 appContent.style.display = 'block';
 
-                // Fetch initial orders (including completed for the sales calculation)
-                const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'ready', 'completed']);
-                if (error) { console.error('Error fetching initial orders:', error); return; }
-                orders = data;
-                renderAllOrders();
+                const [ordersRes, menuRes] = await Promise.all([
+                    supabase.from('orders').select('*').in('status', ['pending', 'ready', 'completed']),
+                    supabase.from('menu_items').select('*').order('id')
+                ]);
+                if (ordersRes.error) console.error('Error fetching orders:', ordersRes.error); else { orders = ordersRes.data; renderAllOrders(); }
+                if (menuRes.error) console.error('Error fetching menu:', menuRes.error); else { menuItems = menuRes.data; renderAllMenuItems(); }
 
                 supabase.channel('public:orders')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
                         const { eventType, new: newOrderData, old: oldOrderData } = payload;
-
                         let orderId = eventType === 'DELETE' ? oldOrderData.id : newOrderData.id;
                         const existingOrderIndex = orders.findIndex(o => o.id === orderId);
 
-                        if (eventType === 'INSERT') {
-                            if (existingOrderIndex === -1) orders.push(newOrderData);
-                        } else if (eventType === 'UPDATE') {
-                            if (existingOrderIndex > -1) orders[existingOrderIndex] = newOrderData;
-                        } else if (eventType === 'DELETE') {
-                             if (existingOrderIndex > -1) orders.splice(existingOrderIndex, 1);
-                        }
+                        if (eventType === 'INSERT') { if (existingOrderIndex === -1) orders.push(newOrderData); }
+                        else if (eventType === 'UPDATE') { if (existingOrderIndex > -1) orders[existingOrderIndex] = newOrderData; }
+                        else if (eventType === 'DELETE') { if (existingOrderIndex > -1) orders.splice(existingOrderIndex, 1); }
                         renderAllOrders();
-
-                    }).subscribe((status) => {
-                        if (status === 'SUBSCRIBED') {
-                            connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-gray-500">Connected</span>`;
-                         } else {
-                            connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-sm font-medium text-gray-500">Connection Error</span>`;
-                         }
+                    }).subscribe(status => {
+                        if (status === 'SUBSCRIBED') { connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-sm font-medium text-gray-500">Connected</span>`; }
+                        else { connectionStatusEl.innerHTML = `<div class="w-3 h-3 rounded-full bg-red-500"></div><span class="text-sm font-medium text-gray-500">Connection Error</span>`; }
                     });
 
+                supabase.channel('public:menu_items')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, payload => {
+                        const updatedItem = payload.new;
+                        const index = menuItems.findIndex(item => item.id === updatedItem.id);
+                        if (index > -1) { menuItems[index] = updatedItem; renderAllMenuItems(); }
+                    }).subscribe();
+
                 html5QrCode = new Html5Qrcode("qr-reader-container");
-                const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                const qrCodeSuccessCallback = (decodedText) => {
                     scannerModal.classList.add('hidden');
                     try { html5QrCode.stop(); } catch(e) {}
                     confirmPaymentAndAcceptOrder(decodedText);
@@ -277,35 +283,25 @@
                 scanQrBtn.addEventListener('click', () => {
                     scannerModal.classList.remove('hidden');
                     scannerModal.classList.add('flex');
-                    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                        .catch(err => {
-                            console.error(`QR Code scanning failed. Reason: ${err}`)
-                            alert("Could not start camera. Please ensure you've given permission.");
-                        });
+                    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback).catch(err => alert("Could not start camera. Please ensure you've given permission."));
                 });
-
-                closeScannerBtn.addEventListener('click', () => {
-                    scannerModal.classList.add('hidden');
-                    try { html5QrCode.stop(); } catch(e) { console.warn("Scanner already stopped.")}
-                });
+                closeScannerBtn.addEventListener('click', () => { scannerModal.classList.add('hidden'); try { html5QrCode.stop(); } catch(e) {} });
 
                 document.getElementById('orders-board').addEventListener('click', (e) => {
                     const target = e.target.closest('button');
                     if (!target) return;
-
-                    if (target.matches('.update-status-btn')) {
-                        target.disabled = true;
-                        target.textContent = 'Completing...';
-                        updateOrderStatus(target.dataset.id, target.dataset.status);
-                    }
-                    if (target.matches('.manual-confirm-btn')) {
-                        if(confirm('Are you sure you want to manually confirm payment for this order?')) {
-                            confirmPaymentAndAcceptOrder(target.dataset.id);
-                        }
-                    }
+                    if (target.matches('.update-status-btn')) { target.disabled = true; target.textContent = '...'; updateOrderStatus(target.dataset.id, target.dataset.status); }
+                    if (target.matches('.manual-confirm-btn')) { if(confirm('Manually confirm payment for this order?')) { confirmPaymentAndAcceptOrder(target.dataset.id); } }
                 });
 
                 calculateSalesBtn.addEventListener('click', calculateAndDisplayDailySales);
+                generateTopItemsBtn.addEventListener('click', generateTopItemsReport);
+                tabs.forEach(button => button.addEventListener('click', () => {
+                    tabs.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+                }));
 
             } catch(error) {
                 console.error("Initialization failed:", error);
