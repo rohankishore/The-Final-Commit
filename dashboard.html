@@ -113,6 +113,26 @@
             <button id="close-qr-modal-btn" class="w-full mt-2 text-sm text-gray-500 dark:text-gray-400">Close</button>
         </div>
     </div>
+    <div id="order-details-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-xl p-6 w-full max-w-sm text-center relative">
+             <button id="close-order-details-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">&times;</button>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Order Details</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">ID: <span id="details-order-id"></span></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Placed: <span id="details-order-time"></span></p>
+            <div id="details-payment-verified" class="hidden items-center justify-center space-x-2 text-green-600 dark:text-green-400 mb-4">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span class="font-bold text-lg">Payment Verified</span>
+            </div>
+            <div class="text-left my-6 border-t border-b border-gray-200 dark:border-gray-700 py-4">
+                 <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Items:</h3>
+                 <ul id="details-order-items" class="space-y-2 text-lg text-gray-800 dark:text-white"></ul>
+            </div>
+            <div class="flex justify-between items-center text-2xl font-bold text-gray-800 dark:text-white">
+                <span>Total:</span>
+                <span>₹<span id="details-order-total"></span></span>
+            </div>
+        </div>
+    </div>
     <nav class="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm border-t dark:border-gray-700 shadow-lg">
         <div class="flex justify-around max-w-2xl mx-auto">
             <button data-page="food-page" class="nav-button flex-1 p-3 text-center text-gray-500 dark:text-gray-400 active"><svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><p class="text-xs font-medium">Home</p></button>
@@ -154,15 +174,15 @@
         const orderIdDisplay = document.getElementById('order-id-display');
         const closeQrModalBtn = document.getElementById('close-qr-modal-btn');
         const vegOnlyToggle = document.getElementById('veg-only-toggle');
+        const orderDetailsModal = document.getElementById('order-details-modal');
+        const closeOrderDetailsBtn = document.getElementById('close-order-details-btn');
 
         async function getSupabaseConfig() {
-            // --- FOR LOCAL DEVELOPMENT ---
             const SUPABASE_URL = "YOUR_SUPABASE_URL";
             const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
             if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
                 return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
             }
-            // --- For Vercel/Production ---
             try {
                 const response = await fetch('/api/config');
                 if (!response.ok) { throw new Error('Failed to fetch config'); }
@@ -244,12 +264,31 @@
             }
         }
 
+        function showOrderDetails(order) {
+            document.getElementById('details-order-id').textContent = order.id.substring(0, 8);
+            document.getElementById('details-order-time').textContent = new Date(order.created_at).toLocaleString();
+            document.getElementById('details-order-total').textContent = order.total_price;
+            document.getElementById('details-order-items').innerHTML = order.items.map(item => `<li class="font-semibold">- ${item.name} <span class="font-normal text-gray-500 dark:text-gray-400">x ${item.quantity}</span></li>`).join('');
+
+            const paymentVerifiedEl = document.getElementById('details-payment-verified');
+            if (order.payment_status === 'paid') {
+                paymentVerifiedEl.classList.remove('hidden');
+                paymentVerifiedEl.classList.add('flex');
+            } else {
+                paymentVerifiedEl.classList.add('hidden');
+                paymentVerifiedEl.classList.remove('flex');
+            }
+
+            orderDetailsModal.classList.remove('hidden');
+            orderDetailsModal.classList.add('flex');
+        }
+
         function renderMyOrders(orders) {
             if (!orders || orders.length === 0) { myOrdersContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">You haven't placed any orders yet.</p>`; return; }
-            const statusStyles = { pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', preparing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300' };
+            const statusStyles = { pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', ready: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', completed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300' };
             myOrdersContainer.innerHTML = orders.map(order => {
                 const itemsHtml = order.items.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('');
-                return `<div class="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700"><div class="flex justify-between items-center mb-2"><span class="text-xs font-semibold px-2 py-1 rounded-full ${statusStyles[order.status] || ''}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span><span class="font-bold text-gray-800 dark:text-white">₹${order.total_price}</span></div><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Order #${order.id.substring(0,8)}</p><ul class="text-sm list-disc list-inside text-gray-600 dark:text-gray-300">${itemsHtml}</ul></div>`
+                return `<button class="order-card-btn w-full text-left bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition" data-order='${JSON.stringify(order)}'><div class="flex justify-between items-center mb-2"><span class="text-xs font-semibold px-2 py-1 rounded-full ${statusStyles[order.status] || ''}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span><span class="font-bold text-gray-800 dark:text-white">₹${order.total_price}</span></div><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Order #${order.id.substring(0,8)}</p><ul class="text-sm list-disc list-inside text-gray-600 dark:text-gray-300">${itemsHtml}</ul></button>`
             }).join('');
         }
 
@@ -435,9 +474,26 @@
                 if (quickOrderCart.length > 0) { placeOrderOrQuickOrder(quickOrderCart); } else { alert("None of your usual items are available right now."); }
             });
             closeQrModalBtn.addEventListener('click', () => { orderQrModal.classList.add('hidden'); orderQrModal.classList.remove('flex'); });
+            myOrdersContainer.addEventListener('click', (e) => {
+                const card = e.target.closest('.order-card-btn');
+                if (card) {
+                    const orderData = JSON.parse(card.dataset.order);
+                    showOrderDetails(orderData);
+                }
+            });
+            closeOrderDetailsBtn.addEventListener('click', () => {
+                orderDetailsModal.classList.add('hidden');
+                orderDetailsModal.classList.remove('flex');
+            });
 
-            supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async (payload) => {
+            supabase.channel('public:orders:user_id=eq.'+user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, async (payload) => {
                  console.log('Order change received!', payload);
+                if (payload.eventType === 'UPDATE' && currentOrder && payload.new.id === currentOrder.id && payload.new.payment_status === 'paid') {
+                    orderQrModal.classList.add('hidden');
+                    orderQrModal.classList.remove('flex');
+                    alert("Payment confirmed! Your order is being prepared.");
+                    currentOrder = null;
+                }
                 const { data: updatedOrders } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
                 renderMyOrders(updatedOrders);
             }).subscribe();
